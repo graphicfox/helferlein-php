@@ -1,0 +1,17 @@
+{
+    "name": "labor/helferlein-php",
+    "description": "A library of helpers. Nothing more, nothing less",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Martin Neundorfer",
+            "email": "m.neundorfer@labor.digital"
+        }
+    ],
+	  "autoload": {
+		"psr-4": {
+		  "Labor\\Helferlein\\Php\\": "Classes"
+		}
+	  }
+}
