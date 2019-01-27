@@ -10,7 +10,9 @@ namespace Labor\Helferlein\Php\Arrays;
 
 
 use Labor\Helferlein\Php\Exceptions\HelferleinException;
-use Labor\Helferlein\Php\Options;
+use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
+use Labor\Helferlein\Php\Inflector\Inflector;
+use Labor\Helferlein\Php\Options\Options;
 
 class Arrays {
 	
@@ -80,7 +82,7 @@ class Arrays {
 			return $a;
 		};
 		
-		// Loop over all elements
+		// Loop over all given arguments
 		$a = array_shift($args);
 		while (count($args) > 0)
 			$a = $walker($a, array_shift($args), $walker);
@@ -124,6 +126,115 @@ class Arrays {
 		while (is_array($array) && count($array) === 1)
 			$array = reset($array);
 		return $array;
+	}
+	
+	/**
+	 * Searches the most similar key to the given needle from the haystack
+	 *
+	 * @param array  $haystack The array to search similar keys in
+	 * @param string $needle   The needle to search similar keys for
+	 *
+	 * @return string|null The best matching key or null if the given haystack was empty
+	 */
+	public static function getSimilarKey(array $haystack, $needle) {
+		// Check if the needle exists
+		if (isset($haystack[$needle])) return $needle;
+		
+		// Generate alternative keys
+		$alternativeKeys = array_keys($haystack);
+		$alternativeKeys = array_map(function ($v) {
+			return Inflector::toComparable((string)$v);
+		}, array_combine($alternativeKeys, $alternativeKeys));
+		
+		// Search for a similar key
+		$needlePrepared = Inflector::toComparable((string)$needle);
+		$similarKeys = array();
+		foreach ($alternativeKeys as $alternativeKey => $alternativeKeyPrepared) {
+			similar_text($needlePrepared, $alternativeKeyPrepared, $percent);
+			$similarKeys[(int)ceil($percent)] = $alternativeKey;
+		}
+		ksort($similarKeys);
+		
+		// Check for empty keys
+		if (empty($similarKeys)) return null;
+		return array_pop($similarKeys);
+	}
+	
+	/**
+	 * Sorts a given multidimensional array by either a key or a path to a key, by keeping
+	 * the associative relations like asort would
+	 *
+	 * Example:
+	 * $a = array(
+	 *        'asdf' => array(
+	 *            'key' => 2,
+	 *            'sub' => array(
+	 *                'key' => 2
+	 *            )
+	 *        ),
+	 *        'cde' => array(
+	 *            'key' => 1,
+	 *            'sub' => array(
+	 *                'key' => 3
+	 *            )
+	 *        )
+	 * )
+	 *
+	 * // Keys in order
+	 * Arrays::sortBy($a, 'key') => cde, asdf
+	 * Arrays::sortBy($a, 'sub.key') => asdf, cde
+	 *
+	 * @param array  $array   The array to sort
+	 * @param string $key     Either the key or the path to sort by
+	 * @param array  $options Additional config options:
+	 *                        - separator: (Default ".") The separator between the parts if path's are used in $key
+	 *                        - desc: (Default FALSE) By default the method sorts ascending. To change to descending,
+	 *                        set this to true
+	 *
+	 * @return array
+	 * @throws HelferleinInvalidArgumentException
+	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 */
+	public static function sortBy(array $array, string $key, array $options = []): array {
+		$options = Options::make($options, [
+			"separator" => [
+				"type"    => "string",
+				"default" => ".",
+			],
+			"desc"      => [
+				"type"    => "bool",
+				"default" => false,
+			],
+		]);
+		
+		// Check if it is a simple sort => Use fastlane
+		if (stripos($key, $options["separator"]) === false) {
+			uasort($array, function ($a, $b) use ($key) {
+				// Validate input
+				if (!isset($a[$key]) || !isset($b[$key])) {
+					throw new HelferleinInvalidArgumentException('The sort array is maleformed!');
+				}
+				return $a[$key] <=> $b[$key];
+			});
+			return $options["desc"] ? array_reverse($array) : $array;
+		}
+		
+		// Use the workaround for paths as key
+		// This is exorbitantly faster than using arrayGetPath in the approach above.
+		// So this will combine the best of two worlds together
+		$sorter = array();
+		foreach ($array as $k => $v)
+			$sorter[$k] = Arrays::getPath($array, $key, $options["separator"]);
+		asort($sorter);
+		
+		// Sort output
+		$output = array();
+		foreach ($sorter as $k => $foo)
+			$output[$k] = $array[$k];
+		unset($sorter);
+		
+		// Done
+		return $options["desc"] ? array_reverse($output) : $output;
 	}
 	
 	/**
@@ -361,5 +472,73 @@ class Arrays {
 		]);
 		return ArrayPaths::_getList($input, $valueKeys, $keyKey, $options["path"],
 			$options["default"], $options["separator"], $options["gatherLists"]);
+	}
+	
+	/**
+	 * Receives a xml-input and converts it into a multidimensional array
+	 *
+	 * @param string|array|null|\DOMNode|\SimpleXMLElement $input
+	 *
+	 * @return array
+	 * @throws ArrayGeneratorException
+	 */
+	public static function makeFromXml($input): array {
+		return ArrayGenerator::_fromXml($input);
+	}
+	
+	/**
+	 * The method receives an object of sorts and converts it into a multidimensional array
+	 *
+	 * @param $input
+	 *
+	 * @return array
+	 * @throws ArrayGeneratorException
+	 */
+	public static function makeFromObject($input): array {
+		return ArrayGenerator::_fromObject($input);
+	}
+	
+	/**
+	 * Receives a string list like: "1,asdf,foo, bar" which will be converted into [1, "asdf", "foo", "bar"]
+	 * Note the automatic trimming and value conversion of numbers, TRUE, FALSE an null.
+	 * By default the separator is ","
+	 *
+	 * @param string $input     The value to convert into an array
+	 * @param string $separator The separator to split the string at
+	 *
+	 * @return array
+	 * @throws ArrayGeneratorException
+	 */
+	public static function makeFromStringList($input, string $separator = ","): array {
+		return ArrayGenerator::_fromStringList($input, $separator);
+	}
+	
+	/**
+	 * Receives a string value and parses it as a csv into an array
+	 *
+	 * @param string $input         The csv string to parse
+	 * @param bool   $firstLineKeys Set to true if the first line of the csv are keys for all other rows
+	 * @param string $delimiter     The delimiter between multiple fields
+	 * @param string $quote         The enclosure or quoting tag
+	 *
+	 * @return array[]
+	 * @throws ArrayGeneratorException
+	 */
+	public static function makeFromCsv($input, bool $firstLineKeys = false,
+									   string $delimiter = ",", string $quote = "\""): array {
+		return ArrayGenerator::_fromCsv($input, $firstLineKeys, $delimiter, $quote);
+	}
+	
+	/**
+	 * Creates an array out of a json data string.
+	 * Only works with json objects or arrays. Other values will throw an exception
+	 *
+	 * @param $input
+	 *
+	 * @return array
+	 * @throws ArrayGeneratorException
+	 */
+	public static function makefromJson($input): array {
+		return ArrayGenerator::_fromJson($input);
 	}
 }

@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.2] - 2019-01-28
+### Added
+- Added ArrayGenerator to Arrays as replacement for x::castArray()
+- Added Arrays::sortBy()
+- Added Arrays::getSimilarKey()
+- Added HelferleinNotImplementedException
+- Added the remaining methods to Inflector class
+- Added PathsAndLinks as a mixture of different x utilities. It handles everything to do with (file)path's and url's.
+
+### Changed
+- Rewrote Options::make() to a more advanced version as a much slimmer and easier to understand replacement of the ArraySchema stuff in the x package
+- Moved Cookies class into it's own namespace
+- Moved DateAndtime class into it's own namespace
+
+### Removed
+- Removed caster
+
 ## [1.0.1] - 2019-01-25
 ### Added
 - Added Cookies for easier access to cookie data

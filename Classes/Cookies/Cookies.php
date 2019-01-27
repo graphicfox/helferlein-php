@@ -6,7 +6,7 @@
  * Vendor: LABOR.digital
  */
 
-namespace Labor\Helferlein\Php;
+namespace Labor\Helferlein\Php\Cookies;
 
 class Cookies
 {
