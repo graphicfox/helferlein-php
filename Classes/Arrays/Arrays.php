@@ -60,21 +60,39 @@ class Arrays {
 	 * traversing b all its values will be merged into a overruling the value in a. If both values
 	 * are arrays the merge will go deeper and merge the child arrays into eachother.
 	 *
+	 * NOTE: By default numeric keys will be merged into eachother so: [["foo"]] + [["bar"]] becomes [["bar"]]
+	 * You can disable this behaviour by setting FALSE as last argument of this method. The result would then be
+	 * [["foo"], ["bar"]]
+	 *
 	 * @param array[] ...$args
+	 * param bool $mergeNumeric Optional last flag to switch numeric key merge behaviour
 	 *
 	 * @return array
-	 * @throws HelferleinException
+	 * @throws HelferleinInvalidArgumentException
 	 */
 	public static function merge(...$args): array {
+		// Handle last option -> boolean for "mergeNumerics"
+		$lastArg = end($args);
+		$mergeNumeric = TRUE;
+		if (is_bool($lastArg)) {
+			$mergeNumeric = $lastArg;
+			array_pop($args);
+		}
+		
+		// Validate input
 		if (count($args) < 2)
-			throw new HelferleinException("At least 2 elements are required to be merged into eachother!");
-		if (count(array_filter(array_keys($args), "is_array")) === 0)
-			throw new HelferleinException("All elements have to be arrays!");
+			throw new HelferleinInvalidArgumentException("At least 2 elements are required to be merged into eachother!");
+		if (in_array(false, array_map("is_array", $args)))
+			throw new HelferleinInvalidArgumentException("All elements have to be arrays!");
 		
 		// Recursion walker
-		$walker = function ($a, $b, $walker) {
+		$walker = function ($a, $b, $walker) use ($mergeNumeric) {
 			if (empty($a)) return $b;
 			foreach ($b as $k => $v) {
+				if (!$mergeNumeric && is_numeric($k)) {
+					$a[] = $v;
+					continue;
+				}
 				if (isset($a[$k]) && is_array($a[$k]) && is_array($v))
 					$v = $walker($a[$k], $v, $walker);
 				$a[$k] = $v;
@@ -86,6 +104,32 @@ class Arrays {
 		$a = array_shift($args);
 		while (count($args) > 0)
 			$a = $walker($a, array_shift($args), $walker);
+		return $a;
+	}
+	
+	/**
+	 * This helper can be used to attach one array to the end of another.
+	 * This is basically [...] + [...] but without overriding numeric keys
+	 *
+	 * @param array $args
+	 *
+	 * @return array
+	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 */
+	public static function attach(...$args): array {
+		$_args = $args;
+		if (count($args) < 2)
+			throw new HelferleinInvalidArgumentException("At least 2 elements are required to be attached to eachother!");
+		if (in_array(false, array_map("is_array", $_args)))
+			throw new HelferleinInvalidArgumentException("All elements have to be arrays!");
+		
+		$a = array_shift($args);
+		while (count($args) > 0) {
+			foreach (array_shift($args) as $k => $v) {
+				if (!is_numeric($k)) $a[$k] = $v;
+				else $a[] = $v;
+			}
+		}
 		return $a;
 	}
 	
@@ -148,7 +192,7 @@ class Arrays {
 		
 		// Search for a similar key
 		$needlePrepared = Inflector::toComparable((string)$needle);
-		$similarKeys = array();
+		$similarKeys = [];
 		foreach ($alternativeKeys as $alternativeKey => $alternativeKeyPrepared) {
 			similar_text($needlePrepared, $alternativeKeyPrepared, $percent);
 			$similarKeys[(int)ceil($percent)] = $alternativeKey;
@@ -156,7 +200,7 @@ class Arrays {
 		ksort($similarKeys);
 		
 		// Check for empty keys
-		if (empty($similarKeys)) return null;
+		if (empty($similarKeys)) return NULL;
 		return array_pop($similarKeys);
 	}
 	
@@ -203,12 +247,12 @@ class Arrays {
 			],
 			"desc"      => [
 				"type"    => "bool",
-				"default" => false,
+				"default" => FALSE,
 			],
 		]);
 		
 		// Check if it is a simple sort => Use fastlane
-		if (stripos($key, $options["separator"]) === false) {
+		if (stripos($key, $options["separator"]) === FALSE) {
 			uasort($array, function ($a, $b) use ($key) {
 				// Validate input
 				if (!isset($a[$key]) || !isset($b[$key])) {
@@ -222,13 +266,13 @@ class Arrays {
 		// Use the workaround for paths as key
 		// This is exorbitantly faster than using arrayGetPath in the approach above.
 		// So this will combine the best of two worlds together
-		$sorter = array();
+		$sorter = [];
 		foreach ($array as $k => $v)
 			$sorter[$k] = Arrays::getPath($array, $key, $options["separator"]);
 		asort($sorter);
 		
 		// Sort output
-		$output = array();
+		$output = [];
 		foreach ($sorter as $k => $foo)
 			$output[$k] = $array[$k];
 		unset($sorter);
@@ -524,7 +568,7 @@ class Arrays {
 	 * @return array[]
 	 * @throws ArrayGeneratorException
 	 */
-	public static function makeFromCsv($input, bool $firstLineKeys = false,
+	public static function makeFromCsv($input, bool $firstLineKeys = FALSE,
 									   string $delimiter = ",", string $quote = "\""): array {
 		return ArrayGenerator::_fromCsv($input, $firstLineKeys, $delimiter, $quote);
 	}

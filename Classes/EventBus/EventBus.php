@@ -9,7 +9,7 @@
 namespace Labor\Helferlein\Php\EventBus;
 
 
-use Labor\Helferlein\Php\Options;
+use Labor\Helferlein\Php\Options\Options;
 
 class EventBus implements EventBusInterface {
 	
@@ -37,12 +37,23 @@ class EventBus implements EventBusInterface {
 	 */
 	protected $events = [];
 	
+	/**
+	 * @inheritdoc
+	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 */
 	public function emit($event, array $options = []) {
 		
 		// Prepare options
 		$options = Options::make($options, [
-			"event" => NULL,
-			"args"  => [],
+			"event" => [
+				"type" => ["null", EventInterface::class],
+			],
+			"args"  => [
+				"type" => ["array"],
+				"default" => []
+			],
 		]);
 		
 		// Ignore if the event is not known
@@ -54,7 +65,7 @@ class EventBus implements EventBusInterface {
 		else if (is_object($options["event"])) $e = $options["event"];
 		else if (is_string($options["event"])) $e = new $options["event"]($this, $event, $options["args"]);
 		if (!$e instanceof EventInterface) throw new InvalidEventException("The given event object/class does not implement the EventInterface!");
-
+		
 		// Loop over all handlers
 		foreach ($this->events[$event] as $handlerId) {
 			$handler = $this->handlers[$handlerId];
@@ -67,6 +78,10 @@ class EventBus implements EventBusInterface {
 		return $e->getArgs();
 	}
 	
+	/**
+	 * @inheritdoc
+	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 */
 	public function bind($events, callable $handler) {
 		
 		// Handle multiple events
@@ -83,6 +98,10 @@ class EventBus implements EventBusInterface {
 		$this->events[$event][$handlerId] = $handlerId;
 	}
 	
+	/**
+	 * @inheritdoc
+	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 */
 	public function unbind($events, callable $handler = NULL) {
 		// Handle multiple events
 		if (is_array($events)) {
@@ -112,6 +131,10 @@ class EventBus implements EventBusInterface {
 			unset($this->events[$event]);
 	}
 	
+	/**
+	 * @inheritdoc
+	 * @return mixed|void
+	 */
 	public function addSubscriber(EventSubscriberInterface $instance) {
 		/** @var \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
 		$subscription = new $this->eventSubscriptionClass($this, $instance);

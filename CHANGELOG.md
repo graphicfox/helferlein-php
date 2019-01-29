@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.3] - 2019-01-29
+### Added
+- Added "callable" type check to Options::make()
+- Added documentation to EventBus implementation
+
+### Changed
+- Inflector::toSlug() now returns lowercase only strings
+
+### Fixed
+- Fixed some issues with Options::make() where the input types of objects where generated incorrectly
+- Fixed some issues with the old implementation of Options::make()
+
 ## [1.0.2] - 2019-01-28
 ### Added
 - Added ArrayGenerator to Arrays as replacement for x::castArray()

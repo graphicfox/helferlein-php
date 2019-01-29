@@ -81,7 +81,7 @@ class Options {
 	 *
 	 * - type: Allows basic type validation of the input. Can either be a string or an array of strings.
 	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number (both int and float)
-	 * string, resource, null and also class names and interface names.
+	 * string, resource, null, callable and also class- and interface names.
 	 * If multiple values are supplied they will be seen as chained via OR operator.
 	 *
 	 * - filter: A callback which is called after the type validation took place and can be used to process a given
@@ -140,8 +140,10 @@ class Options {
 			if (!empty($definition[$k]["type"])) {
 				$types = static::getTypesOf($v);
 				if (empty(array_intersect($types, $definition[$k]["type"]))) {
+					$type = reset($types);
+					if($type === "object") $type = implode(", ", $types);
 					$errors[] = "Invalid option type at: \"" . implode(".", $path) . "\" given; Allowed types: \"" .
-						implode("\", \"", $definition[$k]["type"]) . "\". Given type: \"" . reset($types) . "\"!";
+						implode("\", \"", $definition[$k]["type"]) . "\". Given type: \"" . $type . "\"!";
 					array_pop($path);
 					continue;
 				}
@@ -199,10 +201,14 @@ class Options {
 			$path[] = $k;
 			
 			// Convert simple definition -> Fast lane
-			if (!is_array($v))
-				return ["default" => $v];
-			else if (is_array($v) && count($v) === 1 && is_numeric(key($v)) && is_array(reset($v)))
-				return ["default" => reset($v)];
+			if (!is_array($v)) {
+				$definitionPrepared[$k] = ["default" => $v];
+				continue;
+			}
+			else if (is_array($v) && count($v) === 1 && is_numeric(key($v)) && is_array(reset($v))){
+				$definitionPrepared[$k] = ["default" => reset($v)];
+				continue;
+			}
 			
 			// Validate the given definition
 			$hasConfiguration = false;
@@ -262,6 +268,7 @@ class Options {
 	protected static function getTypesOf($value): array {
 		$type = strtolower(gettype($value));
 		$types = [$type];
+		if(is_callable($value)) $types[] = "callable";
 		if ($type === "double") {
 			$types[] = "float";
 			$types[] = "number";
@@ -273,8 +280,8 @@ class Options {
 			$types[] = $value ? "true" : "false";
 		} else if ($type === "object") {
 			$types[] = get_class($value);
-			$types[] = class_implements($value);
-			$types[] = class_parents($value);
+			$types = array_merge($types, class_implements($value));
+			$types = array_merge($types, class_parents($value));
 		} else if (is_numeric($value)) $types[] = "number";
 		return $types;
 	}

@@ -84,8 +84,8 @@ class Inflector {
 	
 	/**
 	 * Converts a "Given string" to "Given-string" or
-	 * "another.String-you wouldWant" to "another-String-you-would-Want".
-	 * But in addition to that, it will convert "Annahäuser_Römertopf.jpg" into "Annahaeuser-Roemertopf-jpg"
+	 * "another.String-you wouldWant" to "another-string-you-would-want".
+	 * But in addition to that, it will convert "Annahäuser_Römertopf.jpg" into "annahaeuser-roemertopf-jpg"
 	 *
 	 * NOTE: Yes, this is a shameless copy of
 	 * http://book.cakephp.org/2.0/en/core-utility-libraries/inflector.html#Inflector::slug
@@ -101,7 +101,7 @@ class Inflector {
 				"/[\s\p{Zs}]+/mu"                                     => "-",
 				sprintf("/^[%s]+|[%s]+$/", "\\-", "\\-")              => "",
 			);
-		return (string)preg_replace(array_keys($map), array_values($map), $string);
+		return strtolower((string)preg_replace(array_keys($map), array_values($map), $string));
 	}
 	
 	/**
