@@ -26,7 +26,7 @@ class Cookies
 		
 		// Load the value
 		$value = $_COOKIE[$identifier];
-		if (substr($value, 0, 5) === "@enc@") $value = unserialize(base64_decode(substr($value, 5)));
+		if (substr($value, 0, 5) === "@enc@") $value = json_decode(base64_decode(substr($value, 5)));
 		return $value;
 	}
 	
@@ -45,7 +45,7 @@ class Cookies
 	{
 		// Prepare value
 		if (!is_string($value) && !is_numeric($value))
-			$value = "@enc@" . base64_encode(serialize($value));
+			$value = "@enc@" . base64_encode(json_encode($value));
 		
 		// Prepare lifetime
 		switch ($lifetime)

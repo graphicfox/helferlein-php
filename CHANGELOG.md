@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.4] - 2019-02-06
+### Changed
+- Cookies will no longer use serialize() but json_encode to store the data
+
 ## [1.0.3] - 2019-01-29
 ### Added
 - Added "callable" type check to Options::make()
