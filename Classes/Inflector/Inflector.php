@@ -184,9 +184,9 @@ class Inflector {
 			}
 			if ($options["splitAtDash"] !== false) $pattern .= "[\-]+|";
 			if ($options["splitAtUnderscore"] !== false) $pattern .= "[_]+|";
-			if ($options["splitAtPeriod"] !== false) $pattern .= "[\s]+|";
-			if ($options["splitAtSpace"] !== false)
-				$pattern = rtrim($pattern, "|") . "/";
+			if ($options["splitAtPeriod"] !== false) $pattern .= "[.]+|";
+			if ($options["splitAtSpace"] !== false) $pattern .= "[\s]+|";
+			$pattern = rtrim($pattern, "|") . "/";
 		}
 		
 		// Do the split
