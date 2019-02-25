@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.5] - 2019-02-25
+### Added
+- Added FilesAndFolders helper to make some repeating tasks easier
+- Added a relativePath() implementation to PathsAndLinks
+
+### Changed
+- BREAKING: Removed the $options parameter from the Inflector::toArray(). I adapted the simpler "intelligentSplitting" option instead and applied all the bugfixes I did to the Helferlein javascript counterpart.
+
 ## [1.0.4] - 2019-02-06
 ### Changed
 - Cookies will no longer use serialize() but json_encode to store the data

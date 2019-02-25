@@ -80,6 +80,47 @@ class PathsAndLinks {
 	}
 	
 	/**
+	 * Computes the relative path between two path's.
+	 * Not my code but form here: https://stackoverflow.com/a/2638272
+	 *
+	 * @param $from
+	 * @param $to
+	 *
+	 * @return string
+	 */
+	public static function relativePath($from, $to) {
+		// Some compatibility fixes for Windows paths
+		$from = is_dir($from) ? rtrim($from, "\/") . "/" : $from;
+		$to = is_dir($to) ? rtrim($to, "\/") . "/" : $to;
+		$from = str_replace("\\", "/", $from);
+		$to = str_replace("\\", "/", $to);
+		
+		$from = explode("/", $from);
+		$to = explode("/", $to);
+		$relPath = $to;
+		
+		foreach ($from as $depth => $dir) {
+			// find first non-matching dir
+			if ($dir === $to[$depth]) {
+				// ignore this directory
+				array_shift($relPath);
+			} else {
+				// get number of remaining dirs to $from
+				$remaining = count($from) - $depth;
+				if ($remaining > 1) {
+					// add traversals up to first matching dir
+					$padLength = (count($relPath) + $remaining - 1) * -1;
+					$relPath = array_pad($relPath, $padLength, "..");
+					break;
+				} else {
+					$relPath[0] = "./" . $relPath[0];
+				}
+			}
+		}
+		return implode("/", $relPath);
+	}
+	
+	/**
 	 * This method tries to split up a given url into its different parts using a combination of parse_url() and
 	 * parse_str() to do so. It is possible to pass a full url or the query segment only.
 	 *
@@ -106,21 +147,21 @@ class PathsAndLinks {
 		}
 	}
 	
-	public static function makeLink(array $options = [], $baseUrl = null): string {
+	public static function makeLink(array $options = [], $baseUrl = NULL): string {
 		throw new HelferleinNotImplementedException("This feature is currently not completely implemented!");
 		$hasOptions = !empty($options);
 		$options = Options::make($options, [
 			"hostOnly" => [
 				"type"    => "bool",
-				"default" => false,
+				"default" => FALSE,
 			],
 			"*"        => [
 				"type"    => ["false", "null"],
-				"default" => false,
+				"default" => FALSE,
 			],
 			"user"     => $partDef = [
 				"type"    => ["false", "null", "string"],
-				"default" => false,
+				"default" => FALSE,
 			],
 			"pass"     => $partDef,
 			"port"     => $partDef,
@@ -130,7 +171,7 @@ class PathsAndLinks {
 			"fragment" => $partDef,
 			"query"    => [
 				"type"    => ["false", "null", "string", "array"],
-				"default" => false,
+				"default" => FALSE,
 			],
 		]);
 		$baseUrl = Options::makeSingle("baseUrl", $baseUrl, [

@@ -17,7 +17,7 @@ class Inflector {
 	 *
 	 * @var array
 	 */
-	const TRANSLITERATIONS = array(
+	const TRANSLITERATIONS = [
 		"/À|Á|Â|Ã|Å|Ǻ|Ā|Ă|Ą|Ǎ/"           => "A",
 		"/Æ|Ǽ/"                           => "AE",
 		"/Ä/"                             => "Ae",
@@ -75,7 +75,7 @@ class Inflector {
 		"/є/"                             => "ye",
 		"/ї/"                             => "yi",
 		"/ź|ż|ž/"                         => "z",
-	);
+	];
 	
 	/**
 	 * A list of filenames we know and recognize as such
@@ -96,11 +96,11 @@ class Inflector {
 	 * @return string
 	 */
 	public static function toSlug(string $string): string {
-		$map = self::TRANSLITERATIONS + array(
+		$map = self::TRANSLITERATIONS + [
 				"/[^\s\p{Zs}\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}]/mu" => " ",
 				"/[\s\p{Zs}]+/mu"                                     => "-",
 				sprintf("/^[%s]+|[%s]+$/", "\\-", "\\-")              => "",
-			);
+			];
 		return strtolower((string)preg_replace(array_keys($map), array_values($map), $string));
 	}
 	
@@ -113,16 +113,16 @@ class Inflector {
 	 *
 	 * @return string
 	 */
-	public static function toFile(string $string, bool $expectPath = false): string {
+	public static function toFile(string $string, bool $expectPath = FALSE): string {
 		// Handle file extension
 		$ext = pathinfo($string, PATHINFO_EXTENSION);
-		if (!empty($ext) && stripos(self::FILE_EXTENSIONS, $ext) !== false) {
-			$ext = '.' . $ext;
+		if (!empty($ext) && stripos(self::FILE_EXTENSIONS, $ext) !== FALSE) {
+			$ext = "." . $ext;
 			$string = substr($string, 0, -strlen($ext));
-		} else $ext = '';
+		} else $ext = "";
 		
 		// Handle filepath if required
-		$path = '';
+		$path = "";
 		if ($expectPath) {
 			$string = basename($string);
 			$path = PathsAndLinks::unifyPath(dirname($string));
@@ -134,59 +134,44 @@ class Inflector {
 	 * Converts a "Given string" to ["given", "string"] or
 	 * "another.String-you wouldWant" to ["another", "string", "you", "would", "want"].
 	 *
-	 * @param string $string    The string to inflect
-	 * @param array  $options   A configuration array to deactivate specific split settings.
-	 *                          All split settings are active by default. To disable a splitter
-	 *                          set its key to FALSE. Split settings are:
-	 *                          - splitAtUpperCase: Splits "myKeyValue" into ["my", "key", "value"]
-	 *                          - splitAtDash: Splits "my-key-value" into ["my", "key", "value"]
-	 *                          - splitAtUnderscore: Splits "my_key_value" into ["my", "key", "value"]
-	 *                          - splitAtPeriod: Splits "my.key.value" into ["my", "key", "value"]
-	 *                          - splitAtSpace: Splits "my key value" into ["my", "key", "value"]
-	 *
-	 *                          - splitAtUpperCaseSensible: The splitter "splitAtUpperCase" is rather dumb
-	 *                          if you give it words like IP, URL, and so on, because it will split them
-	 *                          like I, P and U, R, L (because of their upper chars) but stuff like HandMeAMango
-	 *                          on the other hand will be correctly splitted like: hand, me, a, mango.
-	 *                          If you"d like a bit more "sensible" splitting set this to true,
-	 *                          so upper case characters following each other will not be splitted
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting The default splitter is rather dumb when it comes to edge cases like  IP,
+	 *                                     URL, and so on, because it will split them like I, P and U, R, L but stuff
+	 *                                     like HandMeAMango on the other hand will be correctly splitted like: hand,
+	 *                                     me, a, mango. If you set this to true, those edge cases will be handled.
+	 *                                     Problems might occure when stuff like "ThisIsFAQandMore" is given, because
+	 *                                     the camelCase is broken the result will be: this is fa qand more.
 	 *
 	 * @return array
 	 */
-	public static function toArray(string $string, array $options = []): array {
+	public static function toArray(string $string, bool $intelligentSplitting = FALSE): array {
 		// Build pattern
-		$pattern = "/(?=[A-Z])|[\-]+|[_]+|[\.]+|[\s]+/";
-		if (!empty($options)) {
-			$pattern = "/";
-			if ($options["splitAtUpperCase"] !== false) {
-				// Don"t split if the whole string is in upper case
-				if ($string === strtoupper($string)) ;
-				else if ($options["splitAtUpperCaseSensible"] === true) {
-					// Precompile
-					// This replaces everything thats in upper case with itself but with a space in front.
-					// If there is more than a single char, like in ThisIsAGreatWord it will strip the
-					// G (in Great) off and push it into the next word. The result will be: this is a great word.
-					// Words like FAQ will be kept together if given alone.
-					// Problems might occure when stuff like "ThisIsFAQandMore" is given,
-					// because the camelCase is broken the result will be: this is fa qand more.
-					$string = preg_replace_callback("/[A-Z]+/s", function ($v) {
-						$nextWord = "";
-						if (strlen($v = (string)reset($v)) > 1) {
-							$nextWord = " " . substr($v, -1);
-							$v = substr($v, 0, -1);
-						}
-						return strtolower(" " . $v . $nextWord);
-					}, $string);
-				} else {
-					// Rather dumb splitting
-					$pattern .= "(?=[A-Z])|";
+		$pattern = "/(?=[A-Z])|[\-]+|[_]+|[.]+|[\s]+/";
+		
+		// Handle intelligent splitting
+		if ($intelligentSplitting) {
+			// Precompile
+			// This replaces everything thats in upper case with itself but with a space in front.
+			// If there is more than a single char, like in ThisIsAGreatWord it will strip the
+			// G (in Great) off and push it into the next word. The result will be: this is a great word.
+			// Words like FAQ will be kept together if given alone.
+			// Problems might occure when stuff like "ThisIsFAQandMore" is given,
+			// because the camelCase is broken the result will be: this is fa qand more.
+			$offset = 0;
+			$stringLength = strlen($string);
+			$string = preg_replace_callback("/([A-Z]+)|(?P<DOT>[\s\S])/s", function ($v) use (&$offset, $stringLength) {
+				$a = $v[0];
+				// We need this workaround, as there is no other way of determining the offset in a php regex...
+				$wordLength = strlen($a);
+				$offset += $wordLength;
+				if (isset($v["DOT"])) return $a;
+				$nextWord = "";
+				if ($wordLength > 1 && $offset !== $stringLength) {
+					$nextWord = " " . substr($a, -1);
+					$a = substr($a, 0, -1);
 				}
-			}
-			if ($options["splitAtDash"] !== false) $pattern .= "[\-]+|";
-			if ($options["splitAtUnderscore"] !== false) $pattern .= "[_]+|";
-			if ($options["splitAtPeriod"] !== false) $pattern .= "[.]+|";
-			if ($options["splitAtSpace"] !== false) $pattern .= "[\s]+|";
-			$pattern = rtrim($pattern, "|") . "/";
+				return strtolower(" " . $a . $nextWord);
+			}, $string);
 		}
 		
 		// Do the split
@@ -199,89 +184,89 @@ class Inflector {
 	 * Converts a "Given string" to "Given String" or
 	 * "another.String-you wouldWant" to "Another String You Would Want".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toSpacedUpper(string $string, array $options = []): string {
-		return implode(" ", array_map("ucfirst", static::toArray($string, $options)));
+	public static function toSpacedUpper(string $string, bool $intelligentSplitting = FALSE): string {
+		return implode(" ", array_map("ucfirst", static::toArray($string, $intelligentSplitting)));
 	}
 	
 	/**
 	 * Alias of toSpacedUpper
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toHuman(string $string, array $options = []): string {
-		return static::toSpacedUpper($string, $options);
+	public static function toHuman(string $string, bool $intelligentSplitting = FALSE): string {
+		return static::toSpacedUpper($string, $intelligentSplitting);
 	}
 	
 	/**
 	 * Converts a "Given string" to "GivenString" or
 	 * "another.String-you wouldWant" to "AnotherStringYouWouldWant".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toCamelCase(string $string, array $options = []): string {
-		return implode(array_map('ucfirst', static::toArray($string, $options)));
+	public static function toCamelCase(string $string, bool $intelligentSplitting = FALSE): string {
+		return implode(array_map("ucfirst", static::toArray($string, $intelligentSplitting)));
 	}
 	
 	/**
 	 * Converts a "Given string" to "givenString" or
 	 * "another.String-you wouldWant" to "anotherStringYouWouldWant".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toCamelBack(string $string, array $options = []): string {
-		return lcfirst(static::toCamelCase($string, $options));
+	public static function toCamelBack(string $string, bool $intelligentSplitting = FALSE): string {
+		return lcfirst(static::toCamelCase($string, $intelligentSplitting));
 	}
 	
 	/**
 	 * Converts a "Given string" to "given-string" or
 	 * "another.String-you wouldWant" to "another-string-you-would-want".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toDashed(string $string, array $options = []): string {
-		return implode('-', static::toArray($string, $options));
+	public static function toDashed(string $string, bool $intelligentSplitting = FALSE): string {
+		return implode("-", static::toArray($string, $intelligentSplitting));
 	}
 	
 	/**
 	 * Converts a "Given string" to "given_string" or
 	 * "another.String-you wouldWant" to "another_string_you_would_want".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toUnderscore(string $string, array $options = []): string {
-		return implode('_', static::toArray($string, $options));
+	public static function toUnderscore(string $string, bool $intelligentSplitting = FALSE): string {
+		return implode("_", static::toArray($string, $intelligentSplitting));
 	}
 	
 	/**
 	 * Alias of toUnderscore();
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
+	 * @param string $string               The string to inflect
+	 * @param bool   $intelligentSplitting -> See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toDatabase(string $string, array $options = []): string {
-		return static::toUnderscore($string, $options);
+	public static function toDatabase(string $string, bool $intelligentSplitting = FALSE): string {
+		return static::toUnderscore($string, $intelligentSplitting);
 	}
 	
 	/**
@@ -292,44 +277,55 @@ class Inflector {
 	 * @param string $prefix  By default "get", could be "is" or "has" if it is required
 	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
 	 *                        NOTE: In addition to that $options can contain the following:
-	 *                        - sanitize: If false the property sanitazion will be disabled
+	 *                        - sanitize (bool): If false the property sanitazion will be disabled
+	 *                        - intelligentSplitting (bool): See Inflector::toArray() $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
-	public static function toGetter(string $string, $prefix = 'get', array $options = []): string {
+	public static function toGetter(string $string, $prefix = "get", array $options = []): string {
 		// Only apply if the variable does not contain the prefix already
-		$cc = static::toCamelCase(static::sanitizeGetterAndSetterPrefix($string, $options), $options);
-		return stripos($cc, $prefix) !== false ? $cc : $prefix . $cc;
+		$cc = static::toCamelCase(
+			static::sanitizeGetterAndSetterPrefix($string, $options),
+			$options["intelligentSplitting"] === TRUE);
+		return stripos($cc, $prefix) !== FALSE ? $cc : $prefix . $cc;
 	}
 	
 	/**
 	 * Converts a "Given string" to "setGivenString" or
 	 * "another.String-you wouldWant" to "setAnotherStringYouWouldWant".
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
-	 *                        NOTE: In addition to that $options can contain the following:
-	 *                        - sanitize: If false the property sanitazion will be disabled
+	 * @param string $string       The string to inflect
+	 * @param array  $options      A configuration array to deactivate specific split settings. @see toArray() for
+	 *                             details. NOTE: In addition to that $options can contain the following:
+	 *                             - sanitize: If false the property sanitazion will be disabled
+	 *                             - intelligentSplitting (bool): See Inflector::toArray()
+	 *                             $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
 	public static function toSetter(string $string, array $options = []): string {
-		return 'set' . static::toCamelCase(static::sanitizeGetterAndSetterPrefix($string, $options), $options);
+		return "set" . static::toCamelCase(
+				static::sanitizeGetterAndSetterPrefix($string, $options),
+				$options["intelligentSplitting"] === TRUE);
 	}
 	
 	/**
 	 * This is in general an alias of toCamelBack(); But in addition to that it will also strip away has/get/is..
 	 * prefixes from the given value
 	 *
-	 * @param string $string  The string to inflect
-	 * @param array  $options A configuration array to deactivate specific split settings. @see toArray() for details.
-	 *                        NOTE: In addition to that $options can contain the following:
-	 *                        - sanitize: If false the property sanitazion will be disabled
+	 * @param string $string       The string to inflect
+	 * @param array  $options      A configuration array to deactivate specific split settings. @see toArray() for
+	 *                             details. NOTE: In addition to that $options can contain the following:
+	 *                             - sanitize: If false the property sanitazion will be disabled
+	 *                             - intelligentSplitting (bool): See Inflector::toArray()
+	 *                             $intelligentSplitting for details
 	 *
 	 * @return string
 	 */
 	public static function toProperty(string $string, array $options = []): string {
-		return static::toCamelBack(static::sanitizeGetterAndSetterPrefix($string, $options), $options);
+		return static::toCamelBack(
+			static::sanitizeGetterAndSetterPrefix($string, $options),
+			$options["intelligentSplitting"] === TRUE);
 	}
 	
 	/**
@@ -341,13 +337,13 @@ class Inflector {
 	 * @param string $string                  The string to unify
 	 * @param bool   $appendNumberOfOccureces By default words have the number of their occurence added to the result.
 	 *                                        For example "the white fox and the hen" => "and1 fox1 hen1 the2 white1"
-	 *                                        If you don't want that quanitification you can disable it using this
+	 *                                        If you don"t want that quanitification you can disable it using this
 	 *                                        option. The result would then be: "and fox hen the white"
 	 *
 	 *
 	 * @return string
 	 */
-	public static function toComparable(string $string, bool $appendNumberOfOccureces = true): string {
+	public static function toComparable(string $string, bool $appendNumberOfOccureces = TRUE): string {
 		$parts = static::toArray(static::toFile($string));
 		$parts = array_count_values($parts);
 		if ($appendNumberOfOccureces) {
@@ -364,7 +360,7 @@ class Inflector {
 	 * Converts any given string into a UUID like: 123e4567-e89b-12d3-a456-426655440000.
 	 * Note that this is NOT A REAL UUID(!), but a representation that will unify
 	 * all strings like " ASDF ASDF" and "asdf_ASDF" or " ASDF ASDF " into the
-	 * same, unified id. This is useful if you want to create, unique id's but
+	 * same, unified id. This is useful if you want to create, unique id"s but
 	 * want to merge multiple datasets with different word order.
 	 *
 	 * Note that "ASDF QWER" will result in the same ID as "QWER ASDF", because
@@ -377,10 +373,10 @@ class Inflector {
 	 */
 	public function toUuid(string $string): string {
 		$string = md5(static::toComparable($string));
-		return substr($string, 0, 8) . '-' .
-			substr($string, 8, 4) . '-' .
-			substr($string, 12, 4) . '-' .
-			substr($string, 16, 4) . '-' .
+		return substr($string, 0, 8) . "-" .
+			substr($string, 8, 4) . "-" .
+			substr($string, 12, 4) . "-" .
+			substr($string, 16, 4) . "-" .
 			substr($string, 20);
 	}
 	
@@ -397,9 +393,9 @@ class Inflector {
 	 */
 	protected static function sanitizeGetterAndSetterPrefix(string $string, array $options) {
 		// Check if we should sanitize the input or not
-		if ($options['sanitize'] !== false)
-			$string = preg_replace('/^(set|get|is|has)/', '', $string);
-		unset($options['sanitize']);
+		if ($options["sanitize"] !== FALSE)
+			$string = preg_replace("/^(set|get|is|has)/", "", $string);
+		unset($options["sanitize"]);
 		return $string;
 	}
 }
