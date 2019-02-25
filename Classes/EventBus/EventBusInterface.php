@@ -30,27 +30,21 @@ interface EventBusInterface {
 	 *
 	 * @param array|string $events  Either an event as a string, or a list of events as array of string
 	 * @param callable     $handler A callback which is executed when the matching event is emitted
-	 *
-	 * @return mixed
 	 */
 	public function bind($events, callable $handler);
 	
 	/**
 	 * Removes either a single handler, or all handlers from the given events
 	 *
-	 * @param array|string $events  Either an event as a string, or a list of events as array of string
+	 * @param array|string  $events  Either an event as a string, or a list of events as array of string
 	 * @param callable|NULL $handler A callback which was previously registered using bind()
-	 *
-	 * @return mixed
 	 */
 	public function unbind($events, callable $handler = NULL);
 	
 	/**
-	 * Adds the handlers registered in an eventsubscriber to the event bus
+	 * Adds the handlers registered in an event subscriber to the event bus
 	 *
 	 * @param \Labor\Helferlein\Php\EventBus\EventSubscriberInterface $instance
-	 *
-	 * @return mixed
 	 */
 	public function addSubscriber(EventSubscriberInterface $instance);
 }

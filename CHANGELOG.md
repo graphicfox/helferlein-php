@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.6] - 2019-02-25
+### Fixed
+- Removed some invalid @return statements from EventBusInterface
+
 ## [1.0.5] - 2019-02-25
 ### Added
 - Added FilesAndFolders helper to make some repeating tasks easier
