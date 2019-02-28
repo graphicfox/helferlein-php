@@ -13,7 +13,7 @@ use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 /**
  * Class ArrayPaths
  *
- * This is functionallity which was extracted from Arrays in order to keep the class somewhat short...
+ * This is functionality which was extracted from Arrays in order to keep the class somewhat short...
  * @package Labor\Helferlein\Php\Arrays
  * @internal
  */
@@ -62,7 +62,7 @@ class ArrayPaths {
 		if (is_array($path)) {
 			$path = array_values($path);
 			$validPathParts = array_filter($path, function ($v) {
-				// Filter out all non strings and non numerics
+				// Filter out all non strings and non numerical
 				return is_string($v) || is_numeric($v);
 			});
 			if (count($path) !== count($validPathParts))
@@ -131,7 +131,7 @@ class ArrayPaths {
 		// Check recursive if the path exists
 		try {
 			$walker = function (array $input, array $path, callable $walker) {
-				list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
+				list($keys, $isLastKey) = static::initWalkerStep($input, $path);
 				if (empty($input) || empty($keys)) throw new \Exception();
 				foreach ($keys as $key) {
 					if (!array_key_exists($key, $input)) throw new \Exception();
@@ -154,7 +154,7 @@ class ArrayPaths {
 	
 	/**
 	 * @param array|mixed  $input     The array to retrieve the path"s values from
-	 * @param array|string $path      The path to retreive from the $input array
+	 * @param array|string $path      The path to receive from the $input array
 	 * @param null|mixed   $default   The value which will be returned if the $path did not match anything.
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
@@ -227,7 +227,7 @@ class ArrayPaths {
 		
 		// Set the values using the recursion walker
 		$walker = function (array &$input, array $path, callable $walker) use ($value) {
-			list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
+			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				if ($isLastKey) {
 					$input[$key] = $value;
@@ -267,7 +267,7 @@ class ArrayPaths {
 		
 		// Start walker
 		$walker = function (array &$input, array $path, callable $walker) use ($removeEmptyRemains) {
-			list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
+			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				if ($isLastKey) {
 					unset($input[$key]);
@@ -298,7 +298,7 @@ class ArrayPaths {
 		
 		// Start the walker
 		$walker = function (array &$input, array $path, string $pathCallback, callable $walker) use ($separator, $callback) {
-			list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
+			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				$pathCallbackLocal = ltrim($pathCallback . $separator . $key, $separator);
 				if ($isLastKey) call_user_func_array($callback, [$pathCallbackLocal, &$input[$key]]);
@@ -408,7 +408,7 @@ class ArrayPaths {
 			// Only simple value keys -> use the fast lane
 			$rowValues = array_intersect_key($row, $simpleValueKeys);
 			
-			// Determine if the value keys contain paths themselfs
+			// Determine if the value keys contain paths themselves
 			if ($hasPathValueKeys) {
 				// Contains path value keys -> also gather their values
 				foreach ($pathValueKeys as $alias => $pathValueKey) {

@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [1.0.7] - 2019-02-28
+### Added
+- Added concept of "boolean flags" to Options::make()
+- Added better alternative for link generation in PathsAndLinks::getLink();
+
+### Changed
+- BREAKING: Removed parseLink() from PathsAndLinks class
+
+### Fixed
+- Fixed some typos
+- Removed some unused variables
+
 ## [1.0.6] - 2019-02-25
 ### Fixed
 - Removed some invalid @return statements from EventBusInterface

@@ -35,12 +35,11 @@ class Options {
 	 * @return mixed
 	 * @throws InvalidDefinitionException
 	 * @throws InvalidOptionException
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinException
 	 */
 	public static function makeSingle(string $paramName, $variable, $definition) {
 		try {
 			$result = static::make(
-				isNull($variable) ? [] : ["@dummySingleParam" => $variable], ["@dummySingleParam" => $definition]);
+				is_null($variable) ? [] : ["@dummySingleParam" => $variable], ["@dummySingleParam" => $definition]);
 			return $result["@dummySingleParam"];
 		} catch (InvalidOptionException $e) {
 			throw new InvalidOptionException(str_replace("@dummySingleParam", $paramName, $e->getMessage()));
@@ -88,7 +87,7 @@ class Options {
 	 * value before the custom validation begins. The callback receives $value, $key, $options, $definition,
 	 * $path(For child arrays)
 	 *
-	 * - validator: A callback which allowes custom validation using closures or other callables. If used the function
+	 * - validator: A callback which allows custom validation using closures or other callables. If used the function
 	 * should return true if the validation was successful or false if not. It is also possible to return a string
 	 * which
 	 * allows you to set your own error message. The callback receives $value, $key, $options, $definition,
@@ -98,9 +97,34 @@ class Options {
 	 * exactly the same way as on root level. NOTE: The children will only be used if the value in $options is an array
 	 * (or has a default value of an empty array)
 	 *
+	 * Boolean flags
+	 * =============================
+	 * It is also possible to supply options that have a type of "boolean" as "flags" which means you don't have
+	 * to supply any values to it.
+	 *
+	 * An Example:
+	 * function myFunc($value, array $options = []){
+	 *    $defaults = [
+	 *        "myFlag" => [
+	 *				"type" => "boolean",
+	 * 				"default" => false
+	 * 		  ],
+	 *        ...
+	 *    ];
+	 *    $options = Options::make($options, $defaults);
+	 *    ...
+	 * }
+	 *
+	 * In action
+	 * myFunc($foo, ["myFlag"])
+	 *
+	 * In this case your $options["myFlag"] will contain a value of TRUE
+	 *
 	 * @param array $input
 	 * @param array $definition
-	 * @param array $options
+	 * @param array $options Additional options
+	 *                       - allowUnknown (bool) false: If set to true, unknown keys will be ignored
+	 *                       and kept in the result, otherwise an exception is thrown
 	 *
 	 * @return array|mixed
 	 * @throws InvalidDefinitionException
@@ -127,13 +151,24 @@ class Options {
 			$path[] = $k;
 			
 			// Check for unknown keys
-			if (!array_key_exists($k, $definition) && $options["allowUnknown"] !== true) {
-				$alternativeKey = Arrays::getSimilarKey($definition, $k);
-				$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
-				if (!empty($alternativeKey)) $e .= " Did you mean: \"$alternativeKey\" instead?";
-				$errors[] = $e;
-				array_pop($path);
-				continue;
+			if(!array_key_exists($k, $definition)){
+				// Check vor boolean flags
+				if(is_int($k) && array_key_exists($v, $definition) && is_array($definition[$v])
+					&& is_array($definition[$v]["type"]) &&
+					(in_array("bool", $definition[$v]["type"]) || in_array("boolean", $definition[$v]["type"])  ||
+						in_array("true", $definition[$v]["type"]))){
+					// Handle flag
+					unset($out[$k]);
+					$out[$v] = true;
+				} else if ($options["allowUnknown"] !== true) {
+					// Handle not found key
+					$alternativeKey = Arrays::getSimilarKey($definition, $k);
+					$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
+					if (!empty($alternativeKey)) $e .= " Did you mean: \"$alternativeKey\" instead?";
+					$errors[] = $e;
+					array_pop($path);
+					continue;
+				}
 			}
 			
 			// Apply type check

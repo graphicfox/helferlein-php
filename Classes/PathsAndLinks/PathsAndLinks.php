@@ -8,10 +8,13 @@
 
 namespace Labor\Helferlein\Php\PathsAndLinks;
 
-use Labor\Helferlein\Php\Exceptions\HelferleinNotImplementedException;
-use Labor\Helferlein\Php\Options\Options;
-
 class PathsAndLinks {
+	
+	/**
+	 * If rendered, this will contain the current url which is displayed in the browser
+	 * @var string
+	 */
+	protected static $currentUrl;
 	
 	/**
 	 * Receives a string (mostly a file path and unifies the slashes for the current filesystem
@@ -57,7 +60,7 @@ class PathsAndLinks {
 	}
 	
 	/**
-	 * Can be used to convert a Fully\Quallified\Classname to Classname
+	 * Can be used to convert a Fully\Qualified\Classname to Classname
 	 *
 	 * @param string $classname The classname to get the basename of.
 	 *
@@ -68,7 +71,7 @@ class PathsAndLinks {
 	}
 	
 	/**
-	 * Can be used to convert a Fully\Quallified\Classname to Fully\Quallified
+	 * Can be used to convert a Fully\Qualified\Classname to Fully\Qualified
 	 * This works the same way dirname() would with a folder path.
 	 *
 	 * @param string $classname The classname of to get the namespace of.
@@ -121,63 +124,67 @@ class PathsAndLinks {
 	}
 	
 	/**
-	 * This method tries to split up a given url into its different parts using a combination of parse_url() and
-	 * parse_str() to do so. It is possible to pass a full url or the query segment only.
+	 * Returns an instance of Link which is a super simple url builder.
 	 *
-	 * NOTE: Only elements which are present in the url will be returned.
-	 * NOTE 2: take a look at makeLink() as well.
+	 * Possible values for $url are:
+	 * TRUE: Returns the representation of the current url
+	 * string: A fully qualified url, or a query string beginning with ?
+	 * array: The result of parse_url() as an array
+	 * Link: Another instance of a link to clone into a new instance
 	 *
-	 * @param string $url A url to parse into an array
+	 * @param null|boolean|string|\Labor\Helferlein\Php\PathsAndLinks\Link|array $url
 	 *
-	 * @return array
+	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
+	 * @throws \Labor\Helferlein\Php\PathsAndLinks\InvalidLinkException
 	 */
-	public static function parseLink(string $url): array {
-		if (filter_var($url, FILTER_VALIDATE_URL)) {
-			// Parse full url
-			$url = parse_url($url);
-			if (!empty($url["query"])) {
-				parse_str($url["query"], $tmp);
-				$url["query"] = $tmp;
-			}
-			return $url;
-		} else {
-			// Try to handle query
-			parse_str($url, $url);
-			return ["query" => $url];
-		}
-	}
-	
-	public static function makeLink(array $options = [], $baseUrl = NULL): string {
-		throw new HelferleinNotImplementedException("This feature is currently not completely implemented!");
-		$hasOptions = !empty($options);
-		$options = Options::make($options, [
-			"hostOnly" => [
-				"type"    => "bool",
-				"default" => FALSE,
-			],
-			"*"        => [
-				"type"    => ["false", "null"],
-				"default" => FALSE,
-			],
-			"user"     => $partDef = [
-				"type"    => ["false", "null", "string"],
-				"default" => FALSE,
-			],
-			"pass"     => $partDef,
-			"port"     => $partDef,
-			"path"     => $partDef,
-			"scheme"   => $partDef,
-			"host"     => $partDef,
-			"fragment" => $partDef,
-			"query"    => [
-				"type"    => ["false", "null", "string", "array"],
-				"default" => FALSE,
-			],
-		]);
-		$baseUrl = Options::makeSingle("baseUrl", $baseUrl, [
-			"type" => ["null", "string", "array", "false"],
-		]);
+	public static function getLink($url = NULL): Link {
 		
-		\x::dbge($options);
+		// Skip if the given url is empty
+		if (empty($url)) return new Link();
+		
+		// A link instance was given
+		if ($url instanceof Link) return clone $url;
+		
+		// True -> create from current url
+		if ($url === TRUE) {
+			if (empty(static::$currentUrl)) {
+				// Protocol
+				$url = isset($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] . "://" :
+					(isset($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'off') ? 'https://' : 'http://');
+				// Hostname
+				$url .= isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :
+					(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+				// URI
+				$url .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : "";
+				static::$currentUrl = $url;
+			}
+			$url = static::$currentUrl;
+		}
+		
+		// Convert string url / query to an url array
+		if (is_string($url)) {
+			$url = trim($url);
+			if (!filter_var($url, FILTER_VALIDATE_URL)) {
+				if ($url[0] === "?") {
+					parse_str($url, $url);
+					$url = ["query" => $url];
+				} else throw new InvalidLinkException("Could not convert the given string \"" . $url . "\" into a link, because it is no valid url");
+			} else {
+				$url = parse_url($url);
+			}
+		}
+		
+		// Validate that we now got an array
+		if (!is_array($url))
+			throw new InvalidLinkException("Could not create a link for the given url, because it is neither a string, nor an array");
+		
+		// Make sure the query is parsed as array
+		if (!empty($url["query"]) && is_string($url["query"])) {
+			parse_str($url["query"], $tmp);
+			$url["query"] = $tmp;
+		}
+		
+		// Return the link instance
+		return new Link($url);
 	}
 }

@@ -395,7 +395,6 @@ class Arrays {
 	 *
 	 * @return void
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinException
 	 */
 	public static function removePath(array &$input, $path, array $options = []) {
 		$options = Options::make($options, [
@@ -504,7 +503,6 @@ class Arrays {
 	 *                                keys.
 	 *
 	 * @return array|null
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinException
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function &getList(array &$input, array $valueKeys, string $keyKey = "", array $options = []) {
