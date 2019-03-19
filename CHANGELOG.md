@@ -1,7 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
 ## [1.0.7] - 2019-02-28
 ### Added
 - Added concept of "boolean flags" to Options::make()
