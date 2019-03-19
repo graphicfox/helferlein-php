@@ -74,27 +74,34 @@ class Options {
 	 * In addition to the simple default values you can also use an array as value in your definitions array.
 	 * In it you can set the following options to validate and filter options as you wish.
 	 *
-	 * - default: This is the default value to use when the key in $options is empty.
+	 * - default (mixed|callable): This is the default value to use when the key in $options is empty.
 	 * If not set the default value is NULL. If the default value is a Closure the closure is called
-	 * and it's result is used as value. The callback receives $key, $options, $definition, $path(For child arrays)
+	 * and it's result is used as value.
+	 * The callback receives $key, $options, $definition, $path(For child arrays)
 	 *
-	 * - type: Allows basic type validation of the input. Can either be a string or an array of strings.
-	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number (both int and float)
-	 * string, resource, null, callable and also class- and interface names.
+	 * - type (string|array): Allows basic type validation of the input. Can either be a string or an array of strings.
+	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number or numeric (both int and float)
+	 * string, resource, null, callable and also class, class-parent and interface names.
 	 * If multiple values are supplied they will be seen as chained via OR operator.
 	 *
-	 * - filter: A callback which is called after the type validation took place and can be used to process a given
-	 * value before the custom validation begins. The callback receives $value, $key, $options, $definition,
-	 * $path(For child arrays)
+	 * - filter (callable): A callback which is called after the type validation took place and can be used to process
+	 * a given value before the custom validation begins.
+	 * The callback receives $value, $key, $options, $definition, $path(For child arrays)
 	 *
-	 * - validator: A callback which allows custom validation using closures or other callables. If used the function
-	 * should return true if the validation was successful or false if not. It is also possible to return a string
-	 * which
-	 * allows you to set your own error message. The callback receives $value, $key, $options, $definition,
-	 * $path(For child arrays)
+	 * - validator (callable): A callback which allows custom validation using closures or other callables. If used the
+	 * function should return true if the validation was successful or false if not. It is also possible to return a
+	 * string which allows you to set your own error message. In addition you may return an array of values that will
+	 * be passed to the "values" validator (see the next point for the functionality)
+	 * The callback receives $value, $key, $options, $definition, $path(For child arrays)
 	 *
-	 * - children: This can be used to apply nested definitions on option trees. The children definition is done
-	 * exactly the same way as on root level. NOTE: The children will only be used if the value in $options is an array
+	 * - values (array): A basic validation routine which receives a list of possible values and will check if
+	 * the given value will match at least one of them (OR operator). The array can either be set statically
+	 * in your definition, or by using a "validator" callback that returns an array of possible values.
+	 * The values validation takes place after the "validator" callback ran.
+	 *
+	 * - children (array): This can be used to apply nested definitions on option trees.
+	 * The children definition is done exactly the same way as on root level.
+	 * NOTE: The children will only be used if the value in $options is an array
 	 * (or has a default value of an empty array)
 	 *
 	 * Boolean flags
@@ -106,9 +113,9 @@ class Options {
 	 * function myFunc($value, array $options = []){
 	 *    $defaults = [
 	 *        "myFlag" => [
-	 *				"type" => "boolean",
-	 * 				"default" => false
-	 * 		  ],
+	 *                "type" => "boolean",
+	 *                "default" => false
+	 *          ],
 	 *        ...
 	 *    ];
 	 *    $options = Options::make($options, $defaults);
@@ -123,7 +130,7 @@ class Options {
 	 * @param array $input
 	 * @param array $definition
 	 * @param array $options Additional options
-	 *                       - allowUnknown (bool) false: If set to true, unknown keys will be ignored
+	 *                       - allowUnknown|ignoreUnknown (bool) false: If set to true, unknown keys will be ignored
 	 *                       and kept in the result, otherwise an exception is thrown
 	 *
 	 * @return array|mixed
@@ -141,7 +148,7 @@ class Options {
 		foreach ($definition as $k => $def) {
 			if (array_key_exists($k, $out)) continue;
 			if (is_object($def["default"]) && $def["default"] instanceof \Closure)
-				$out[$k] = $def["default"]($k, $input, $definition, $path);
+				$out[$k] = $def["default"]($k, $out, $definition, $path);
 			else
 				$out[$k] = $def["default"];
 		}
@@ -151,16 +158,17 @@ class Options {
 			$path[] = $k;
 			
 			// Check for unknown keys
-			if(!array_key_exists($k, $definition)){
+			if (!array_key_exists($k, $definition)) {
 				// Check vor boolean flags
-				if(is_int($k) && array_key_exists($v, $definition) && is_array($definition[$v])
+				if (is_int($k) && array_key_exists($v, $definition) && is_array($definition[$v])
 					&& is_array($definition[$v]["type"]) &&
-					(in_array("bool", $definition[$v]["type"]) || in_array("boolean", $definition[$v]["type"])  ||
-						in_array("true", $definition[$v]["type"]))){
+					(in_array("bool", $definition[$v]["type"]) || in_array("boolean", $definition[$v]["type"]) ||
+						in_array("true", $definition[$v]["type"]))) {
 					// Handle flag
 					unset($out[$k]);
-					$out[$v] = true;
-				} else if ($options["allowUnknown"] !== true) {
+					$k = $v;
+					$v = $out[$v] = TRUE;
+				} else if ($options["allowUnknown"] !== TRUE && $options["ignoreUnknown"] !== TRUE) {
 					// Handle not found key
 					$alternativeKey = Arrays::getSimilarKey($definition, $k);
 					$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
@@ -173,12 +181,11 @@ class Options {
 			
 			// Apply type check
 			if (!empty($definition[$k]["type"])) {
-				$types = static::getTypesOf($v);
-				if (empty(array_intersect($types, $definition[$k]["type"]))) {
-					$type = reset($types);
-					if($type === "object") $type = implode(", ", $types);
+				if (!static::validateTypesOf($v, $definition[$k]["type"])) {
+					$type = strtolower(gettype($v));
+					if ($type === "object") $type = "Instance of: " . get_class($v);
 					$errors[] = "Invalid option type at: \"" . implode(".", $path) . "\" given; Allowed types: \"" .
-						implode("\", \"", $definition[$k]["type"]) . "\". Given type: \"" . $type . "\"!";
+						implode("\", \"", array_keys($definition[$k]["type"])) . "\". Given type: \"" . $type . "\"!";
 					array_pop($path);
 					continue;
 				}
@@ -186,14 +193,39 @@ class Options {
 			
 			// Apply callback if required
 			if (!empty($definition[$k]["filter"]))
-				$out[$k] = call_user_func($definition[$k]["filter"], $v, $k, $input, $definition, $path);
+				$out[$k] = $v = call_user_func($definition[$k]["filter"], $v, $k, $out, $definition, $path);
 			
 			// Apply validator
 			if (!empty($definition[$k]["validator"])) {
-				$validatorResult = call_user_func($definition[$k]["validator"], $v, $k, $input, $definition, $path);
-				if ($validatorResult !== true) {
+				$validatorResult = call_user_func($definition[$k]["validator"], $v, $k, $out, $definition, $path);
+				if (is_array($validatorResult)) {
+					$definition[$k]["values"] = $validatorResult;
+				} else if ($validatorResult !== TRUE) {
 					if (!is_string($validatorResult)) $errors[] = "Invalid option: \"" . implode(".", $path) . "\" given!";
 					else $errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - " . $validatorResult;
+					array_pop($path);
+					continue;
+				}
+			}
+			
+			// Apply values validator
+			if (!empty($definition[$k]["values"])) {
+				if (!in_array($v, $definition[$k]["values"])) {
+					// Stringify value list
+					$valueStrings = [];
+					foreach ($definition[$k]["values"] as $_v) {
+						if (is_string($valueStrings) || is_numeric($valueStrings)) $valueStrings[] = $_v;
+						else if (is_object($valueStrings)) {
+							if (method_exists($valueStrings, "__toString")) {
+								$s = substr((string)$valueStrings, 0, 50);
+								if (strlen($s) === 50) $s .= "...";
+								$valueStrings[] = $s;
+							} else
+								$valueStrings[] = "Object of type: " . get_class($_v);
+						} else $valueStrings[] = "Value of type: " . gettype($_v);
+					}
+					$valueStrings = array_unique($valueStrings);
+					$errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $valueStrings);
 					array_pop($path);
 					continue;
 				}
@@ -239,45 +271,59 @@ class Options {
 			if (!is_array($v)) {
 				$definitionPrepared[$k] = ["default" => $v];
 				continue;
-			}
-			else if (is_array($v) && count($v) === 1 && is_numeric(key($v)) && is_array(reset($v))){
+			} else if (is_array($v) && count($v) === 1 && is_numeric(key($v)) && is_array(reset($v))) {
 				$definitionPrepared[$k] = ["default" => reset($v)];
 				continue;
 			}
 			
 			// Validate the given definition
-			$hasConfiguration = false;
+			$hasConfiguration = FALSE;
 			// Default value
-			if (isset($v["default"])) $hasConfiguration = true;
-			else $v["default"] = null;
+			if (isset($v["default"])) $hasConfiguration = TRUE;
+			else $v["default"] = NULL;
 			// Validator
 			if (isset($v["validator"])) {
-				$hasConfiguration = true;
+				$hasConfiguration = TRUE;
 				if (!is_callable($v["validator"]))
 					throw new InvalidDefinitionException(
 						"Definition error at: " . implode(".", $path) . " - The validator is not callable!");
 			}
 			// Filter
 			if (isset($v["filter"])) {
-				$hasConfiguration = true;
+				$hasConfiguration = TRUE;
 				if (!is_callable($v["filter"]))
 					throw new InvalidDefinitionException(
 						"Definition error at: " . implode(".", $path) . " - The filter is not callable!");
 			}
 			// Value type
 			if (isset($v["type"])) {
-				$hasConfiguration = true;
+				$hasConfiguration = TRUE;
 				if (!is_array($v["type"])) {
 					if (!is_string($v["type"]))
 						throw new InvalidDefinitionException(
 							"Definition error at: " . implode(".", $path) . " - Type definitions have to be an array or a string!");
 					$v["type"] = [$v["type"]];
 				}
+				
+				// Unify types
+				$typesUnique = [];
+				$defaultTypes = ["boolean", "integer", "double", "float", "string", "array", "object", "resource",
+								 "null", "number", "true", "false", "callable",
+				];
+				foreach (array_values($v["type"]) as $type) {
+					$typeLc = trim(strtolower($type));
+					if (in_array($typeLc, $defaultTypes)) $typesUnique[$typeLc] = TRUE;
+					else if ($typeLc === "numeric") $typesUnique["number"] = TRUE;
+					else if ($typeLc === "int") $typesUnique["integer"] = TRUE;
+					else if ($typeLc === "bool") $typesUnique["boolean"] = TRUE;
+					else $typesUnique[$type] = TRUE;
+				}
+				$v["type"] = $typesUnique;
 			}
 			// Child definition
 			if (isset($v["children"])) {
-				$hasConfiguration = true;
-				if ($v["default"] === null) $v["default"] = [];
+				$hasConfiguration = TRUE;
+				if ($v["default"] === NULL) $v["default"] = [];
 				if (!is_array($v["children"]))
 					throw new InvalidDefinitionException(
 						"Definition error at: " . implode(".", $path) . " - Children definitions have to be an array!");
@@ -294,30 +340,38 @@ class Options {
 	}
 	
 	/**
-	 * Internal helper to generate the typelist of a given value
+	 * Internal helper which validates the type of a given value against a list of valid types
 	 *
-	 * @param $value
+	 * @param mixed $value the value to validate
+	 * @param array $types The list of types to validate $value against
 	 *
-	 * @return array
+	 * @return bool
 	 */
-	protected static function getTypesOf($value): array {
+	protected static function validateTypesOf($value, array $types): bool {
 		$type = strtolower(gettype($value));
-		$types = [$type];
-		if(is_callable($value)) $types[] = "callable";
-		if ($type === "double") {
-			$types[] = "float";
-			$types[] = "number";
-		} else if ($type === "integer") {
-			$types[] = "int";
-			$types[] = "number";
-		} else if ($type === "boolean") {
-			$types[] = "bool";
-			$types[] = $value ? "true" : "false";
-		} else if ($type === "object") {
-			$types[] = get_class($value);
-			$types = array_merge($types, class_implements($value));
-			$types = array_merge($types, class_parents($value));
-		} else if (is_numeric($value)) $types[] = "number";
-		return $types;
+		
+		// Simple lookup
+		if (isset($types[$type])) return TRUE;
+		
+		// Object lookup
+		if ($type === "object") {
+			if (isset($types[get_class($value)])) return TRUE;
+			if (count(array_intersect(class_parents($value), array_keys($types))) > 0) return TRUE;
+			if (count(array_intersect(class_implements($value), array_keys($types))) > 0) return TRUE;
+			return FALSE;
+		}
+		
+		// Boolean lookup
+		if ($type === "boolean") return isset($types[$value ? "true" : "false"]);
+		
+		// Numeric lookup
+		if ($type === "integer" || $type === "double" || $type === "float")
+			return isset($types["number"]);
+		
+		// Callable lookup
+		if (isset($types["callable"])) return is_callable($value);
+		
+		// Nope...
+		return FALSE;
 	}
 }
