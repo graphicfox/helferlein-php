@@ -9,9 +9,10 @@
             "email": "m.neundorfer@labor.digital"
         }
     ],
-	  "autoload": {
-		"psr-4": {
-		  "Labor\\Helferlein\\Php\\": "Classes"
-		}
-	  }
+    "autoload": {
+        "psr-4": {
+            "Labor\\Helferlein\\Php\\": "Classes"
+        }
+    },
+    "version": "0.1.0"
 }
