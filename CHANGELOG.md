@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.1.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.1.0%0Dv1.0.9#diff) (2019-03-25)
+
+
+### Bug Fixes
+
+* **ArrayGenerator:** String lists may now also be created from numeric values ([d93ef64](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/d93ef64))
+* **Inflector:** made toUuid static as it should be ([a5155da](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/a5155da))
+* **Link:** query can now be set to NULL ([03044bb](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/03044bb))
+* **Options:** closures are now valid against the "callable" pseudo-type ([614aea9](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/614aea9))
+* **PathsAndLinks:** classNamespace() no longer returns "." when there is no namespace ([fc8164b](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/fc8164b))
+
+
+### Features
+
+* **Events:** Event objects can now be easily instantiated outside the event bus ([ba62409](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/ba62409))
+
+
+### Performance Improvements
+
+* Arrays::merge walker will now skip if one of the given arrays is empty ([c22f905](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/c22f905))
+
+
+
 ## [1.0.9](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.0.9%0Dv1.0.8#diff) (2019-03-19)
 
 
