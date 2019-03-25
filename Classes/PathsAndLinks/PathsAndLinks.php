@@ -79,7 +79,9 @@ class PathsAndLinks {
 	 * @return string
 	 */
 	public static function classNamespace(string $classname): string {
-		return str_replace(DIRECTORY_SEPARATOR, "\\", dirname(str_replace("\\", DIRECTORY_SEPARATOR, $classname)));
+		$result = str_replace(DIRECTORY_SEPARATOR, "\\", dirname(str_replace("\\", DIRECTORY_SEPARATOR, $classname)));
+		if($result === ".") return "";
+		return $result;
 	}
 	
 	/**
