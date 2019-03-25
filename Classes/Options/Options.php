@@ -80,9 +80,9 @@ class Options {
 	 * The callback receives $key, $options, $definition, $path(For child arrays)
 	 *
 	 * - type (string|array): Allows basic type validation of the input. Can either be a string or an array of strings.
-	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number or numeric (both int and float)
-	 * string, resource, null, callable and also class, class-parent and interface names.
-	 * If multiple values are supplied they will be seen as chained via OR operator.
+	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number or numeric (both int and
+	 * float) string, resource, null, callable and also class, class-parent and interface names. If multiple values are
+	 * supplied they will be seen as chained via OR operator.
 	 *
 	 * - filter (callable): A callback which is called after the type validation took place and can be used to process
 	 * a given value before the custom validation begins.
@@ -358,6 +358,9 @@ class Options {
 			if (isset($types[get_class($value)])) return TRUE;
 			if (count(array_intersect(class_parents($value), array_keys($types))) > 0) return TRUE;
 			if (count(array_intersect(class_implements($value), array_keys($types))) > 0) return TRUE;
+			
+			// Closure callable lookup
+			if (isset($types["callable"]) && $value instanceof \Closure) return TRUE;
 			return FALSE;
 		}
 		
