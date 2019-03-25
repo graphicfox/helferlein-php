@@ -208,7 +208,7 @@ class Link {
 	 *
 	 * @return Link
 	 */
-	public function setQuery(array $query): Link {
+	public function setQuery(?array $query): Link {
 		$this->query = $query;
 		return $this;
 	}
