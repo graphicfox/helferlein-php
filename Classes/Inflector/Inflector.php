@@ -371,7 +371,7 @@ class Inflector {
 	 *
 	 * @return string
 	 */
-	public function toUuid(string $string): string {
+	public static function toUuid(string $string): string {
 		$string = md5(static::toComparable($string));
 		return substr($string, 0, 8) . "-" .
 			substr($string, 8, 4) . "-" .
