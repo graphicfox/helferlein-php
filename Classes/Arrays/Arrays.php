@@ -56,11 +56,11 @@ class Arrays {
 	}
 	
 	/**
-	 * This method merges multiple arrays into eachother. It will traverse elements recursively. While
+	 * This method merges multiple arrays into each other. It will traverse elements recursively. While
 	 * traversing b all its values will be merged into a overruling the value in a. If both values
-	 * are arrays the merge will go deeper and merge the child arrays into eachother.
+	 * are arrays the merge will go deeper and merge the child arrays into each other.
 	 *
-	 * NOTE: By default numeric keys will be merged into eachother so: [["foo"]] + [["bar"]] becomes [["bar"]]
+	 * NOTE: By default numeric keys will be merged into each other so: [["foo"]] + [["bar"]] becomes [["bar"]]
 	 * You can disable this behaviour by setting FALSE as last argument of this method. The result would then be
 	 * [["foo"], ["bar"]]
 	 *
@@ -78,7 +78,6 @@ class Arrays {
 			$mergeNumeric = $lastArg;
 			array_pop($args);
 		}
-		
 		// Validate input
 		if (count($args) < 2)
 			throw new HelferleinInvalidArgumentException("At least 2 elements are required to be merged into eachother!");
@@ -88,6 +87,7 @@ class Arrays {
 		// Recursion walker
 		$walker = function ($a, $b, $walker) use ($mergeNumeric) {
 			if (empty($a)) return $b;
+			if (empty($b)) return $a;
 			foreach ($b as $k => $v) {
 				if (!$mergeNumeric && is_numeric($k)) {
 					$a[] = $v;
