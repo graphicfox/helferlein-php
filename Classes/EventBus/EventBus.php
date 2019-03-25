@@ -48,7 +48,7 @@ class EventBus implements EventBusInterface {
 		// Prepare options
 		$options = Options::make($options, [
 			"event" => [
-				"type" => ["null", EventInterface::class],
+				"type" => ["null", EventInterface::class, "callable"],
 			],
 			"args"  => [
 				"type" => ["array"],
@@ -62,9 +62,11 @@ class EventBus implements EventBusInterface {
 		
 		// Create event object
 		if ($options["event"] === NULL) $e = new $this->defaultEventClass($this, $event, $options["args"]);
+		else if (is_callable($options["event"])) $e = call_user_func($options["event"], $this, $event, $options["args"]);
 		else if (is_object($options["event"])) $e = $options["event"];
-		else if (is_string($options["event"])) $e = new $options["event"]($this, $event, $options["args"]);
+		else if (is_string($options["event"])) $e = new $options["event"]();
 		if (!$e instanceof EventInterface) throw new InvalidEventException("The given event object/class does not implement the EventInterface!");
+		$e->__initialize($this, $event, $options["args"]);
 		
 		// Loop over all handlers
 		foreach ($this->events[$event] as $handlerId) {

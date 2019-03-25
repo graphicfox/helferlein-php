@@ -16,7 +16,7 @@ interface EventBusInterface {
 	 *
 	 * @param array|string $event   Either an event as a string, or a list of events as array of string
 	 * @param array        $options Additional options:
-	 *                              - event: string|object Can be used to override the default Event instance using
+	 *                              - event: string|object|callable Can be used to override the default Event instance using
 	 *                              either a class or object of type EventInterface
 	 *                              - args: array A list of arguments which will be passed to all handlers and can be
 	 *                              read/filtered using the $event->getArgs() method

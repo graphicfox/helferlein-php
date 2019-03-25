@@ -12,13 +12,16 @@ namespace Labor\Helferlein\Php\EventBus;
 interface EventInterface {
 	
 	/**
-	 * EventInterface constructor.
+	 * To keep the constructor clean of elements to inject we call the __initialize method before we
+	 * dispatch the event to the handlers. This should make the creation of child event classes a lot easier
 	 *
 	 * @param \Labor\Helferlein\Php\EventBus\EventBusInterface $bus      The instance of the calling event bus
 	 * @param string                                           $eventKey The name of the current event
 	 * @param array                                            $args     Arguments that were passed to this event
+	 *
+	 * @return mixed
 	 */
-	public function __construct(EventBusInterface $bus, string $eventKey, array $args);
+	public function __initialize(EventBusInterface $bus, string $eventKey, array $args);
 	
 	/**
 	 * Returns the instance of the calling event bus

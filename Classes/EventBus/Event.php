@@ -12,6 +12,12 @@ namespace Labor\Helferlein\Php\EventBus;
 class Event implements EventInterface {
 	
 	/**
+	 * True if the __initialize method was called
+	 * @var bool
+	 */
+	protected $initialized = false;
+	
+	/**
 	 * The executing event bus
 	 * @var \Labor\Helferlein\Php\EventBus\EventBusInterface
 	 */
@@ -34,11 +40,12 @@ class Event implements EventInterface {
 	 * @var bool
 	 */
 	protected $stopPropagation = false;
-	
+
 	/**
 	 * @inheritDoc
 	 */
-	public function __construct(EventBusInterface $bus, string $eventKey, array $args) {
+	public function __initialize(EventBusInterface $bus, string $eventKey, array $args) {
+		if($this->initialized) return;
 		$this->eventKey = $eventKey;
 		$this->args = $args;
 		$this->bus = $bus;
@@ -87,5 +94,4 @@ class Event implements EventInterface {
 	public function &getArgs() {
 		return $this->args;
 	}
-	
 }
