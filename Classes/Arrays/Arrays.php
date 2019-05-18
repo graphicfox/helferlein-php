@@ -517,6 +517,104 @@ class Arrays {
 	}
 	
 	/**
+	 * Flattens a multidimensional array into a one dimensional array, while keeping
+	 * their keys as "path". So for example:
+	 *
+	 * $array = ["foo" => 123, "bar" => ["baz" => 234]];
+	 * $arrayFlattened = ["foo" => 123, "bar.baz" => 234];
+	 *
+	 * @param iterable $input
+	 * @param array    $options Additional config options:
+	 *                          - separator (string) default ".": Is used to define the separator
+	 *                          that glues the "key's" of the path together
+	 *                          - arraysOnly (bool) default FALSE: By default this method traverses
+	 *                          all kinds of iterable objects as well as arrays. If you only want
+	 *                          to traverse arrays set this to TRUE
+	 *
+	 * @return array
+	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 */
+	public static function flatten(iterable $input, array $options = []): array {
+		// Prepare options
+		$options = Options::make($options, [
+			"separator" => [
+				"default" => ".",
+				"type" => "string"
+			],
+			"arraysOnly" => [
+				"default" => false,
+				"type" => "bool"
+			]
+		]);
+		
+		// Run the flattener
+		$out = [];
+		$separator = $options["separator"];
+		$arraysOnly = $options["arraysOnly"];
+		$flattener = function(iterable $input, array $path, callable $flattener) use(&$out, $separator, $arraysOnly){
+			foreach ($input as $k => $v){
+				$path[] = $k;
+				if($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
+					$flattener($v, $path, $flattener);
+				} else {
+					$out[implode($separator, $path)] = $v;
+				}
+				array_pop($path);
+			};
+		};
+		$flattener($input, [], $flattener);
+		return $out;
+	}
+	
+	public static function unflatten(iterable $input, array $options = []): array {
+	
+	}
+	
+	/**
+	 * Works exactly like array_map but traverses the array recursively.
+	 *
+	 * You callback will get the following arguments:
+	 * $currentValue, $currentKey, $pathOfKeys, $inputArray
+	 *
+	 * @param iterable $input
+	 * @param callable $callback
+	 * @param array    $options Additional config options:
+	 *                          - arraysOnly (bool) default FALSE: By default this method traverses
+	 *                          all kinds of iterable objects as well as arrays. If you only want
+	 *                          to traverse arrays set this to TRUE
+	 *
+	 * @return iterable
+	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 */
+	public static function mapRecursive(iterable $input, callable $callback, array $options = []):iterable{
+		// Prepare options
+		$options = Options::make($options, [
+			"arraysOnly" => [
+				"default" => false,
+				"type" => "bool"
+			]
+		]);
+		
+		// Run the mapper
+		$arraysOnly = $options["arraysOnly"];
+		$mapper = function(iterable &$i, array $path, callable $mapper) use(&$input, $callback, $arraysOnly){
+			foreach ($i as $k => $v){
+				$path[] = $k;
+				if($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
+					$mapper($i[$k], $path, $mapper);
+				} else {
+					$i[$k] = call_user_func($callback, $v, $k, $path, $input);
+				}
+				array_pop($path);
+			};
+		};
+		$mapper($input, [], $mapper);
+		return $input;
+	}
+	
+	/**
 	 * Receives a xml-input and converts it into a multidimensional array
 	 *
 	 * @param string|array|null|\DOMNode|\SimpleXMLElement $input

@@ -139,7 +139,8 @@ class Options {
 	 */
 	public static function make(array $input, array $definition, array $options = []): array {
 		// Prepare internals
-		$path = is_array($options["@childrensPath"]) ? $options["@childrensPath"] : [];
+		$path = isset($options["@childrensPath"]) &&
+			is_array($options["@childrensPath"]) ? $options["@childrensPath"] : [];
 		$definition = static::prepareAndValidateDefinition($definition, $path);
 		$out = $input;
 		$errors = [];
