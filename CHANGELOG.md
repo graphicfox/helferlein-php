@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.2.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.2.0%0Dv1.1.0#diff) (2019-05-18)
+
+
+### Features
+
+* add Arrays::flatten and Arrays::unflatten helpers ([2002c89](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/2002c89))
+
+
+
 # [1.1.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.1.0%0Dv1.0.9#diff) (2019-03-25)
 
 
