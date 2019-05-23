@@ -1,18 +1,23 @@
 {
-    "name": "labor/helferlein-php",
-    "description": "A library of helpers. Nothing more, nothing less",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Martin Neundorfer",
-            "email": "m.neundorfer@labor.digital"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Labor\\Helferlein\\Php\\": "Classes"
-        }
-    },
-    "version": "1.2.0"
+	"name": "labor/helferlein-php",
+	"description": "A library of helpers. Nothing more, nothing less",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Martin Neundorfer",
+			"email": "m.neundorfer@labor.digital"
+		}
+	],
+	"require": {
+		"php": ">=7.2",
+		"ext-simplexml": "*",
+		"ext-dom": "*"
+	},
+	"autoload": {
+		"psr-4": {
+			"Labor\\Helferlein\\Php\\": "Classes"
+		}
+	},
+	"version": "1.2.0"
 }
