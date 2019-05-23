@@ -9,7 +9,6 @@
 namespace Labor\Helferlein\Php\Arrays;
 
 
-use Labor\Helferlein\Php\Exceptions\HelferleinException;
 use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 use Labor\Helferlein\Php\Inflector\Inflector;
 use Labor\Helferlein\Php\Options\Options;
@@ -81,7 +80,7 @@ class Arrays {
 		// Validate input
 		if (count($args) < 2)
 			throw new HelferleinInvalidArgumentException("At least 2 elements are required to be merged into eachother!");
-		if (in_array(false, array_map("is_array", $args)))
+		if (in_array(FALSE, array_map("is_array", $args)))
 			throw new HelferleinInvalidArgumentException("All elements have to be arrays!");
 		
 		// Recursion walker
@@ -120,7 +119,7 @@ class Arrays {
 		$_args = $args;
 		if (count($args) < 2)
 			throw new HelferleinInvalidArgumentException("At least 2 elements are required to be attached to eachother!");
-		if (in_array(false, array_map("is_array", $_args)))
+		if (in_array(FALSE, array_map("is_array", $_args)))
 			throw new HelferleinInvalidArgumentException("All elements have to be arrays!");
 		
 		$a = array_shift($args);
@@ -137,6 +136,8 @@ class Arrays {
 	 * This method can rename keys of a given array according to a given map
 	 * of ["keyToRename" => "RenamedKey"] as second parameter. Keys not present in $list will be ignored
 	 *
+	 * NOTE: Does NOT work with path's!
+	 *
 	 * @param array $list         The list to rename the keys in
 	 * @param array $keysToRename The map to define which keys should be renamed with another key
 	 *
@@ -147,6 +148,39 @@ class Arrays {
 		foreach ($list as $k => $v)
 			$result[isset($keysToRename[$k]) ? $keysToRename[$k] : $k] = $v;
 		return $result;
+	}
+	
+	/**
+	 * Adds the given key ($insertKey) and value ($insertValue) pair either BEFORE or AFTER
+	 *
+	 * @param array      $array
+	 * @param string|int $positionKey
+	 * @param string|int $insertKey
+	 * @param mixed      $insertValue
+	 * @param bool       $insertBefore
+	 *
+	 * @return array
+	 */
+	public static function insertAt(array $array, $positionKey, $insertKey, $insertValue, bool $insertBefore = FALSE): array {
+		// Remove the existing key
+		unset($array[$insertKey]);
+		
+		// Check if the target key exists
+		if (!array_key_exists($positionKey, $array)) {
+			$array[$insertKey] = $insertValue;
+			return $array;
+		}
+		
+		// Position the new key around the the requested position
+		$position = array_search($positionKey, array_keys($array));
+		$before = array_slice($array, 0, $position, TRUE);
+		$target = [$positionKey => $array[$positionKey]];
+		$after = array_slice($array, $position + 1, NULL, TRUE);
+		
+		// Build the output
+		return $insertBefore ?
+			$before + [$insertKey => $insertValue] + $target + $after :
+			$before + $target + [$insertKey => $insertValue] + $after;
 	}
 	
 	/**
@@ -517,6 +551,26 @@ class Arrays {
 	}
 	
 	/**
+	 * Removes the given list of keys / paths from the $input array and returns the results
+	 *
+	 * @param array $input         The array to strip the unwanted fields from
+	 * @param array $pathsToRemove The keys / paths to remove from $input
+	 * @param array $options       Additional config options
+	 *                             - separator (Default: ".") Can be set to any string
+	 *                             you want to use as separator of path parts.
+	 *                             - removeEmpty (Default: TRUE) Set this to false to disable
+	 *                             the automatic cleanup of empty remains when the lowest
+	 *                             child was removed from a tree.
+	 *
+	 * @return array
+	 */
+	public static function without(array $input, array $pathsToRemove, array $options = []): array {
+		foreach ($pathsToRemove as $path)
+			static::removePath($input, $path, $options);
+		return $input;
+	}
+	
+	/**
 	 * Flattens a multidimensional array into a one dimensional array, while keeping
 	 * their keys as "path". So for example:
 	 *
@@ -538,24 +592,24 @@ class Arrays {
 	public static function flatten(iterable $input, array $options = []): array {
 		// Prepare options
 		$options = Options::make($options, [
-			"separator" => [
+			"separator"  => [
 				"default" => ".",
-				"type" => "string"
+				"type"    => "string",
 			],
 			"arraysOnly" => [
-				"default" => false,
-				"type" => "bool"
-			]
+				"default" => FALSE,
+				"type"    => "bool",
+			],
 		]);
 		
 		// Run the flattener
 		$out = [];
 		$separator = $options["separator"];
 		$arraysOnly = $options["arraysOnly"];
-		$flattener = function(iterable $input, array $path, callable $flattener) use(&$out, $separator, $arraysOnly){
-			foreach ($input as $k => $v){
-				$path[] = $k;
-				if($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
+		$flattener = function (iterable $input, array $path, callable $flattener) use (&$out, $separator, $arraysOnly) {
+			foreach ($input as $k => $v) {
+				$path[] = str_replace($separator, "\\" . $separator, $k);
+				if ($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
 					$flattener($v, $path, $flattener);
 				} else {
 					$out[implode($separator, $path)] = $v;
@@ -567,8 +621,34 @@ class Arrays {
 		return $out;
 	}
 	
+	/**
+	 * Basically the counterpart of flatten()
+	 * Converts a flattened, multidimensional array into a multidimensional dimensional array, using
+	 * their keys as "path". So for example:
+	 *
+	 * $arrayFlattened = ["foo" => 123, "bar.baz" => 234];
+	 * $array = ["foo" => 123, "bar" => ["baz" => 234]];
+	 *
+	 * @param iterable $input   The flattened array to inflate
+	 * @param array    $options Additional config options:
+	 *                          - separator (string) default ".": Is used to define the separator
+	 *                          that glues the "key's" of the path together
+	 *
+	 * @return array
+	 */
 	public static function unflatten(iterable $input, array $options = []): array {
-	
+		// Prepare options
+		$options = Options::make($options, [
+			"separator" => [
+				"default" => ".",
+				"type"    => "string",
+			],
+		]);
+		
+		$out = [];
+		foreach ($input as $path => $value)
+			Arrays::setPath($out, $path, $value, $options["separator"]);
+		return $out;
 	}
 	
 	/**
@@ -588,21 +668,21 @@ class Arrays {
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
 	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
 	 */
-	public static function mapRecursive(iterable $input, callable $callback, array $options = []):iterable{
+	public static function mapRecursive(iterable $input, callable $callback, array $options = []): iterable {
 		// Prepare options
 		$options = Options::make($options, [
 			"arraysOnly" => [
-				"default" => false,
-				"type" => "bool"
-			]
+				"default" => FALSE,
+				"type"    => "bool",
+			],
 		]);
 		
 		// Run the mapper
 		$arraysOnly = $options["arraysOnly"];
-		$mapper = function(iterable &$i, array $path, callable $mapper) use(&$input, $callback, $arraysOnly){
-			foreach ($i as $k => $v){
+		$mapper = function (iterable &$i, array $path, callable $mapper) use (&$input, $callback, $arraysOnly) {
+			foreach ($i as $k => $v) {
 				$path[] = $k;
-				if($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
+				if ($arraysOnly && is_array($arraysOnly) || !$arraysOnly && is_iterable($v)) {
 					$mapper($i[$k], $path, $mapper);
 				} else {
 					$i[$k] = call_user_func($callback, $v, $k, $path, $input);
@@ -624,6 +704,19 @@ class Arrays {
 	 */
 	public static function makeFromXml($input): array {
 		return ArrayGenerator::_fromXml($input);
+	}
+	
+	/**
+	 * This is the counterpart of Arrays::makeFromXml() which takes it's output
+	 * and converts it back into a stringified XML format.
+	 *
+	 * @param array $input    The array to convert to a XML
+	 * @param bool  $asString TRUE to return a string instead of a simple xml element
+	 *
+	 * @return \SimpleXMLElement|string
+	 */
+	public static function dumpToXml(array $input, bool $asString = FALSE) {
+		return ArrayDumper::_toXml($input, $asString);
 	}
 	
 	/**
@@ -678,7 +771,7 @@ class Arrays {
 	 * @return array
 	 * @throws ArrayGeneratorException
 	 */
-	public static function makefromJson($input): array {
+	public static function makeFromJson($input): array {
 		return ArrayGenerator::_fromJson($input);
 	}
 }
