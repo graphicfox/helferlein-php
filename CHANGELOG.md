@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.3.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.3.0%0Dv1.2.0#diff) (2019-05-23)
+
+
+### Bug Fixes
+
+* **ArrayPaths:** add missing $walker variable in _set() method ([0ecc6f9](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/0ecc6f9))
+* **Options:** add missing quote ([e31526a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/e31526a))
+
+
+### Features
+
+* add additional methods for insertAt(), without() and unflatten() ([3f80fc6](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/3f80fc6))
+* add methods to dump arrays into different (currently only xml) string formats ([8649b11](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/8649b11))
+* **ArrayGenerator:** changed the way how xml arrays are created to implement a more speaking output ([9e803ea](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/9e803ea))
+* **FilesAndFolders:** add directoryIterator method and implement it into flushDirectory() ([1a457e2](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/1a457e2))
+
+
+
 # [1.2.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.2.0%0Dv1.1.0#diff) (2019-05-18)
 
 
