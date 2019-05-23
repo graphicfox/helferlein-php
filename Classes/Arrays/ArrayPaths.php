@@ -235,7 +235,7 @@ class ArrayPaths {
 				}
 				if (!array_key_exists($key, $input) || !is_array($input[$key]))
 					$input[$key] = [];
-				$walker($input[$key], $path);
+				$walker($input[$key], $path, $walker);
 			}
 		};
 		$walker($input, $path, $walker);
