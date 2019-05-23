@@ -20,6 +20,8 @@
 namespace Labor\Helferlein\Php\FilesAndFolders;
 
 
+use Labor\Helferlein\Php\Options\Options;
+
 class FilesAndFolders {
 	
 	/**
@@ -30,22 +32,22 @@ class FilesAndFolders {
 	public static function remove(string $filename) {
 		if (is_dir($filename)) {
 			static::flushDirectory($filename);
-			rmdir($filename);
+			@rmdir($filename);
 		} else if (file_exists($filename))
-			unlink($filename);
+			@unlink($filename);
 	}
 	
 	/**
 	 * Removes all contents from a given directory without removing the element itself
+	 *
 	 * @param string $directory
 	 */
 	public static function flushDirectory(string $directory) {
-		if (is_dir($directory)) {
-			foreach (scandir($directory) as $child) {
-				if ($child !== "." && $child !== "..")
-					static::remove($directory . DIRECTORY_SEPARATOR . $child);
+		if (is_dir($directory))
+			foreach (static::directoryIterator($directory, TRUE) as $child) {
+				if ($child->isDir()) rmdir($child->getPathname());
+				else unlink($child->getPathname());
 			}
-		}
 	}
 	
 	/**
@@ -54,8 +56,50 @@ class FilesAndFolders {
 	 * @param string $directory
 	 * @param int    $mode
 	 */
-	public static function mkdir(string $directory, $mode = 0777){
-		if(is_dir($directory)) return;
-		mkdir($directory, $mode, true);
+	public static function mkdir(string $directory, $mode = 0777) {
+		if (is_dir($directory)) return;
+		mkdir($directory, $mode, TRUE);
+	}
+	
+	/**
+	 * Helper to create a directory iterator (I always forget the syntax -.-)
+	 * Dots will automatically be skipped
+	 *
+	 * @param string $directory The directory to iterate
+	 * @param bool   $recursive default: false | If set to true the directory will be iterated recursively
+	 * @param array  $options   Additional configuration options:
+	 *                          - fileRegex (string) default: "" | Optional Regex pattern the returned files have to
+	 *                          match
+	 *                          - folderFirst (bool) default: FALSE | By default the folder is returned after it's
+	 *                          contents. If you set this to true, the folder will be returned first
+	 *
+	 * @return \Iterator|\RecursiveIteratorIterator|\FilesystemIterator|\SplFileInfo[]
+	 */
+	public static function directoryIterator(string $directory, bool $recursive = FALSE, array $options = []): \Iterator {
+		$options = Options::make($options, [
+			"fileRegex"   => [
+				"type"    => "string",
+				"default" => "",
+			],
+			"folderFirst" => [
+				"type"    => "bool",
+				"default" => FALSE,
+			],
+		]);
+		
+		// Check if we got a directory
+		if (!is_dir($directory)) return new \EmptyIterator();
+		
+		// Create the iterator
+		$it = $recursive ?
+			new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
+				$options["folderFirst"] ? \RecursiveIteratorIterator::SELF_FIRST : \RecursiveIteratorIterator::CHILD_FIRST) :
+			new \FilesystemIterator($directory);
+		
+		// Apply a file regex if required
+		if (!empty($options["fileRegex"])) return new \RegexIterator($it, $options["fileRegex"]);
+		
+		// Done
+		return $it;
 	}
 }
