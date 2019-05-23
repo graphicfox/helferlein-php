@@ -140,7 +140,7 @@ class Options {
 	public static function make(array $input, array $definition, array $options = []): array {
 		// Prepare internals
 		$path = isset($options["@childrensPath"]) &&
-			is_array($options["@childrensPath"]) ? $options["@childrensPath"] : [];
+		is_array($options["@childrensPath"]) ? $options["@childrensPath"] : [];
 		$definition = static::prepareAndValidateDefinition($definition, $path);
 		$out = $input;
 		$errors = [];
@@ -226,7 +226,7 @@ class Options {
 						} else $valueStrings[] = "Value of type: " . gettype($_v);
 					}
 					$valueStrings = array_unique($valueStrings);
-					$errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $valueStrings);
+					$errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $valueStrings) . "\"";
 					array_pop($path);
 					continue;
 				}
