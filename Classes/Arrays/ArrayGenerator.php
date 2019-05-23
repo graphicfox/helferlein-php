@@ -44,7 +44,7 @@ class ArrayGenerator {
 		if ($input instanceof \DOMNode || $input instanceof \SimpleXMLElement) return static::_fromXml($input);
 		// Convert iterator and standard class
 		if ($input instanceof \Iterator || $input instanceof \stdClass) {
-			$out = array();
+			$out = [];
 			foreach ($input as $k => $v) $out[$k] = $v;
 			return $out;
 		}
@@ -72,11 +72,11 @@ class ArrayGenerator {
 		foreach ($parts as $k => $v) {
 			$v = trim($v);
 			$vLower = strtolower($v);
-			if ($vLower === "null") $parts[$k] = null;
-			else if ($vLower === "false") $parts[$k] = false;
-			else if ($vLower === "true") $parts[$k] = true;
+			if ($vLower === "null") $parts[$k] = NULL;
+			else if ($vLower === "false") $parts[$k] = FALSE;
+			else if ($vLower === "true") $parts[$k] = TRUE;
 			else if (is_numeric($vLower)) {
-				if (strpos($vLower, ".") !== false) $parts[$k] = (float)$v;
+				if (strpos($vLower, ".") !== FALSE) $parts[$k] = (float)$v;
 				else $parts[$k] = (int)$v;
 			}
 		}
@@ -94,7 +94,7 @@ class ArrayGenerator {
 	 * @return array[]
 	 * @throws ArrayGeneratorException
 	 */
-	public static function _fromCsv($input, bool $firstLineKeys = false,
+	public static function _fromCsv($input, bool $firstLineKeys = FALSE,
 									string $delimiter = ",", string $quote = "\""): array {
 		if (is_array($input)) return $input;
 		if (empty($input)) return [];
@@ -124,7 +124,7 @@ class ArrayGenerator {
 				continue;
 			}
 			// Apply key length to line
-			$lines[$ln] = array_pad(array_slice($line, 0, $keyLength), $keyLength, null);
+			$lines[$ln] = array_pad(array_slice($line, 0, $keyLength), $keyLength, NULL);
 		}
 		return $lines;
 	}
@@ -138,22 +138,27 @@ class ArrayGenerator {
 	 * @return array
 	 * @throws ArrayGeneratorException
 	 */
-	public static function _fromJson($input): array{
+	public static function _fromJson($input): array {
 		if (is_array($input)) return $input;
 		if (empty($input)) return [];
 		if (!is_string($input))
 			throw new ArrayGeneratorException("The given input is not supported as JSON array source!");
 		$input = trim($input);
-		if($input[0] !== "{" && $input[0] !== "[")
+		if ($input[0] !== "{" && $input[0] !== "[")
 			throw new ArrayGeneratorException("The given input is a string, but has no array as JSON data, so its no supported array source!");
-		return @json_decode($input, true);
+		$data = @json_decode($input, TRUE);
+		if (JSON_ERROR_NONE !== json_last_error())
+			Throw new ArrayGeneratorException("Error generating json: " . json_last_error_msg());
+		return $data;
 	}
 	
 	/**
-	 * This method is basically a carbon copy of cakephp"s xml::_toArray method
+	 * This method is basically a slightly adjusted clone of cakephp"s xml::_toArray method
 	 * It recursively converts a given xml tree into an associative php array
 	 *
 	 * @see https://github.com/cakephp/utility/blob/master/Xml.php
+	 *
+	 * The array will contain the tag, attributes text content and nodes recursively.
 	 *
 	 * @param \SimpleXMLElement $xml The xml element to traverse
 	 * @param array             $parentData
@@ -162,29 +167,25 @@ class ArrayGenerator {
 	 *
 	 * @return array
 	 */
-	protected static function xmlObjectToArray(\SimpleXMLElement $xml, array &$parentData = [], string $ns = null, array $namespaces = null) {
-		if ($ns === null) $ns = "";
-		if ($namespaces === null) $namespaces = array_keys(array_merge(["" => ""], $xml->getNamespaces(true)));
+	protected static function xmlObjectToArray(\SimpleXMLElement $xml, array &$parentData = [], string $ns = NULL, array $namespaces = NULL) {
+		if ($ns === NULL) $ns = "";
+		if ($namespaces === NULL) $namespaces = array_keys(array_merge(["" => ""], $xml->getNamespaces(TRUE)));
 		$data = [];
-		
 		foreach ($namespaces as $namespace) {
-			foreach ($xml->attributes($namespace, true) as $key => $value) {
+			foreach ($xml->attributes($namespace, TRUE) as $key => $value) {
 				if (!empty($namespace)) $key = $namespace . ":" . $key;
 				$data["@" . $key] = (string)$value;
 			}
-			foreach ($xml->children($namespace, true) as $child)
+			foreach ($xml->children($namespace, TRUE) as $child)
 				static::xmlObjectToArray($child, $data, $namespace, $namespaces);
 		}
 		$asString = trim((string)$xml);
-		if (empty($data)) $data = $asString;
-		elseif (strlen($asString) > 0) $data["@"] = $asString;
+		if (empty($data)) $data = ["content" => $asString];
+		else if (strlen($asString) > 0) $data["content"] = $asString;
 		if (!empty($ns)) $ns .= ":";
 		$name = $ns . $xml->getName();
-		if (isset($parentData[$name])) {
-			if (!is_array($parentData[$name]) || !isset($parentData[$name][0]))
-				$parentData[$name] = [$parentData[$name]];
-			$parentData[$name][] = $data;
-		} else $parentData[$name] = $data;
+		$data = ["tag" => $name] + $data;
+		$parentData[] = $data;
 		return $parentData;
 	}
 }
