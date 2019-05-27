@@ -55,7 +55,8 @@ class ArrayDumper {
 				if ($prop === "tag" || $prop === "content") continue;
 				if (!is_string($prop)) {
 					$pathLocal = $path;
-					$pathLocal[] = $prop;
+					$pathLocal[] = $entry["tag"];
+					if (!isset($value["tag"])) $pathLocal[] = $prop;
 					$walker($value, $pathLocal, $child, $walker);
 				} else if ($prop[0] === "@") $child->addAttribute(substr($prop, 1), $value);
 				else throw new ArrayDumperException("Invalid entry prop: " . $prop . " at " . implode(".", $path));
