@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.4.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.4.0%0Dv1.3.0#diff) (2019-05-27)
+
+
+### Bug Fixes
+
+* **ArrayDumper:** More speaking path when printing xml errors ([287e74e](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/287e74e))
+
+
+### Features
+
+* **FilesAndFolders:** add additional helpers to read and write files as well as setting permissions ([3ce2092](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/3ce2092))
+
+
+
 # [1.3.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.3.0%0Dv1.2.0#diff) (2019-05-23)
 
 
