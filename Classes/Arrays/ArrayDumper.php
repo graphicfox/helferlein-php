@@ -49,7 +49,7 @@ class ArrayDumper {
 			if ($xml === NULL)
 				$child = $xml = new \SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?><" . $entry["tag"] . "/>");
 			else
-				$child = $xml->addChild($entry["tag"], isset($entry["content"]) ? $entry["content"] : NULL);
+				$child = $xml->addChild($entry["tag"], isset($entry["content"]) ? htmlspecialchars($entry["content"]) : NULL);
 			
 			foreach ($entry as $prop => $value) {
 				if ($prop === "tag" || $prop === "content") continue;
