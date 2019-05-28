@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.1%0Dv1.5.0#diff) (2019-05-28)
+
+
+### Bug Fixes
+
+* **FilesAndFolders:** try to fix weired issues where files that don't exist, exist according to php and vice versa... ([52d0d3a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/52d0d3a))
+
+
+
 # [1.5.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.0%0Dv1.4.0#diff) (2019-05-28)
 
 
