@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.5.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.0%0Dv1.4.0#diff) (2019-05-28)
+
+
+### Bug Fixes
+
+* **ArrayDumper:** make sure the content of xml nodes is encoded using htmlspecialchars() ([3be45d2](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/3be45d2))
+
+
+### Features
+
+* add FormatAndConvert as group of misc formatter and converter functions ([3dacc4f](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/3dacc4f))
+
+
+
 # [1.4.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.4.0%0Dv1.3.0#diff) (2019-05-27)
 
 
