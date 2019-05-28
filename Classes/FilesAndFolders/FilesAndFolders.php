@@ -45,8 +45,9 @@ class FilesAndFolders {
 	public static function flushDirectory(string $directory) {
 		if (is_dir($directory))
 			foreach (static::directoryIterator($directory, TRUE) as $child) {
-				if ($child->isDir()) rmdir($child->getPathname());
-				else unlink($child->getPathname());
+				if (!file_exists($child->getPathname())) continue;
+				if ($child->isDir()) @rmdir($child->getPathname());
+				else @unlink($child->getPathname());
 			}
 	}
 	
@@ -57,8 +58,8 @@ class FilesAndFolders {
 	 * @param int    $mode
 	 */
 	public static function mkdir(string $directory, $mode = 0777) {
-		if (is_dir($directory)) return;
-		mkdir($directory, $mode, TRUE);
+		if (is_dir($directory) || file_exists($directory)) return;
+		@mkdir($directory, $mode, TRUE);
 	}
 	
 	/**
