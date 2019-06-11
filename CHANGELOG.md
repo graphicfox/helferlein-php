@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.2](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.2%0Dv1.5.1#diff) (2019-06-11)
+
+
+### Bug Fixes
+
+* **FilesAndFolders:** add clearstatcache() calls to deleting methods ([4e6618a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4e6618a))
+
+
+
 ## [1.5.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.1%0Dv1.5.0#diff) (2019-05-28)
 
 
