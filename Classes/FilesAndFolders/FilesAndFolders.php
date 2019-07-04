@@ -35,6 +35,7 @@ class FilesAndFolders {
 			@rmdir($filename);
 		} else if (file_exists($filename))
 			@unlink($filename);
+		clearstatcache();
 	}
 	
 	/**
@@ -49,6 +50,7 @@ class FilesAndFolders {
 				if ($child->isDir()) @rmdir($child->getRealPath());
 				else @unlink($child->getRealPath());
 			}
+		clearstatcache();
 	}
 	
 	/**

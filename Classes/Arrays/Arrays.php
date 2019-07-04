@@ -55,6 +55,19 @@ class Arrays {
 	}
 	
 	/**
+	 * Sorts the given list by the length of the contained strings
+	 *
+	 * @param array $list The array of strings you want to sort
+	 * @param bool  $asc  Default: False Set this to true if you want to sort ascending (shortest first)
+	 */
+	public static function sortByStrLen(array &$list, bool $asc = FALSE) {
+		uasort($list, function ($a, $b) {
+			return strlen((string)$b) - strlen((string)$a);
+		});
+		if ($asc) $list = array_reverse($list, TRUE);
+	}
+	
+	/**
 	 * This method merges multiple arrays into each other. It will traverse elements recursively. While
 	 * traversing b all its values will be merged into a overruling the value in a. If both values
 	 * are arrays the merge will go deeper and merge the child arrays into each other.

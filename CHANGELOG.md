@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.6.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.6.0%0Dv1.5.2#diff) (2019-07-04)
+
+
+### Bug Fixes
+
+* **ArrayPaths:** fix issue where the cached path was not sensitive to the configured separator ([b696ddd](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/b696ddd))
+
+
+### Features
+
+* **ArrayGenerator:** Array from xml now can also decode xml strings that don't start with the opening <?xml... tag ([ebc0cbb](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/ebc0cbb))
+* **Arrays:** add new sortByStrLen() helper to sort an array of strings according to their string length ([50756a7](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/50756a7))
+
+
+
+## [1.5.2](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.2%0Dv1.5.1#diff) (2019-06-11)
+
+
+### Bug Fixes
+
+* **FilesAndFolders:** add clearstatcache() calls to deleting methods ([4e6618a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4e6618a))
+
+
+
+## [1.5.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.1%0Dv1.5.0#diff) (2019-05-28)
+
+
+### Bug Fixes
+
+* **FilesAndFolders:** try to fix weired issues where files that don't exist, exist according to php and vice versa... ([52d0d3a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/52d0d3a))
+
+
+
 # [1.5.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.5.0%0Dv1.4.0#diff) (2019-05-28)
 
 
