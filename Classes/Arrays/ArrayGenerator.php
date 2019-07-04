@@ -27,6 +27,13 @@ class ArrayGenerator {
 		// Convert xml objects into arrays
 		if ($input instanceof \DOMNode) $input = simplexml_import_dom($input);
 		if ($input instanceof \SimpleXMLElement) return static::xmlObjectToArray($input);
+		
+		// Try fallback if the xml header is missing but the rest is ok
+		if (is_string($input)) {
+			$input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . $input;
+			$input = simplexml_load_string($input);
+			if ($input instanceof \SimpleXMLElement) return static::xmlObjectToArray($input);
+		}
 		throw new ArrayGeneratorException("The given input is not supported as XML array source!");
 	}
 	
