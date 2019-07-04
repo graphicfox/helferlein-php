@@ -70,7 +70,7 @@ class ArrayPaths {
 					"There are problems with: " . implode(", ", array_diff($validPathParts, $path)));
 		} else {
 			// Check if we know this path already
-			$cacheKey = md5(is_string($path) || is_numeric($path) ? $path : json_encode($path) . $separator);
+			$cacheKey = md5(is_string($path) || is_numeric($path) ? $path . $separator : json_encode($path) . $separator);
 			if (!empty(static::$cache[$cacheKey])) return static::$cache[$cacheKey];
 			
 			// Parse the path from a string
