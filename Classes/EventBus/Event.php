@@ -15,7 +15,7 @@ class Event implements EventInterface {
 	 * True if the __initialize method was called
 	 * @var bool
 	 */
-	protected $initialized = false;
+	protected $initialized = FALSE;
 	
 	/**
 	 * The executing event bus
@@ -39,13 +39,14 @@ class Event implements EventInterface {
 	 * True if the propagation of the event was stopped
 	 * @var bool
 	 */
-	protected $stopPropagation = false;
-
+	protected $stopPropagation = FALSE;
+	
 	/**
 	 * @inheritDoc
 	 */
 	public function __initialize(EventBusInterface $bus, string $eventKey, array $args) {
-		if($this->initialized) return;
+		if ($this->initialized) return;
+		$this->initialized = TRUE;
 		$this->eventKey = $eventKey;
 		$this->args = $args;
 		$this->bus = $bus;
@@ -69,7 +70,7 @@ class Event implements EventInterface {
 	 * @inheritDoc
 	 */
 	public function stopPropagation(): EventInterface {
-		$this->stopPropagation = true;
+		$this->stopPropagation = TRUE;
 		return $this;
 	}
 	
@@ -83,7 +84,7 @@ class Event implements EventInterface {
 	/**
 	 * @inheritDoc
 	 */
-	public function setArgs(array $args): EventInterface{
+	public function setArgs(array $args): EventInterface {
 		$this->args = $args;
 		return $this;
 	}
