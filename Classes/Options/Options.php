@@ -170,6 +170,13 @@ class Options {
 					$k = $v;
 					$v = $out[$v] = TRUE;
 				} else if ($options["allowUnknown"] !== TRUE && $options["ignoreUnknown"] !== TRUE) {
+					// Check if this is a numeric value -> Probably a boolean flag
+					if (is_numeric($k) && is_string($v)) {
+						$k = $v;
+						array_pop($path);
+						$path[] = $k;
+					}
+					
 					// Handle not found key
 					$alternativeKey = Arrays::getSimilarKey($definition, $k);
 					$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
