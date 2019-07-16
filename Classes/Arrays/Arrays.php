@@ -59,12 +59,32 @@ class Arrays {
 	 *
 	 * @param array $list The array of strings you want to sort
 	 * @param bool  $asc  Default: False Set this to true if you want to sort ascending (shortest first)
+	 *
+	 * @return array
 	 */
-	public static function sortByStrLen(array &$list, bool $asc = FALSE) {
+	public static function sortByStrLen(array &$list, bool $asc = FALSE): array {
 		uasort($list, function ($a, $b) {
 			return strlen((string)$b) - strlen((string)$a);
 		});
 		if ($asc) $list = array_reverse($list, TRUE);
+		return $list;
+	}
+	
+	/**
+	 * Sorts the given list by the length of the key's strings
+	 * Similar to sortByStrLen() but sorts by key instead of the value
+	 *
+	 * @param array $list The array of strings you want to sort
+	 * @param bool  $asc  Default: False Set this to true if you want to sort ascending (shortest first)
+	 *
+	 * @return array
+	 */
+	public static function sortByKeyStrLen(array &$list, bool $asc = FALSE): array {
+		uksort($list, function ($a, $b) {
+			return strlen((string)$b) - strlen((string)$a);
+		});
+		if ($asc) $list = array_reverse($list, TRUE);
+		return $list;
 	}
 	
 	/**
