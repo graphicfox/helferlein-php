@@ -278,9 +278,17 @@ class FilesAndFolders {
 			throw new FilesAndFoldersException("Could not write file: " . $filename .
 				" - Permission denied! Permissions: " . static::getPermissions($filename));
 		
-		// Dump the content
+		// Try to write file with save guard
+		$tmpFileName = $filename . ".writing." . md5(microtime(TRUE) . rand(0, 99999999)) . ".txt";
+		$result = @file_put_contents($tmpFileName, $content, $flags);
+		if ($result) $result = @rename($tmpFileName, $filename);
+		if ($result) return;
+		else @unlink($tmpFileName);
+		
+		// Dump the content using the normal way
 		$result = @file_put_contents($filename, $content, $flags);
 		if (!$result)
 			throw new FilesAndFoldersException("Could not write file: " . $filename . " because: " . error_get_last()["message"]);
+		
 	}
 }
