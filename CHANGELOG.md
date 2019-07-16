@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.7.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.0%0Dv1.6.1#diff) (2019-07-16)
+
+
+### Bug Fixes
+
+* **EventBus:** make sure initialized property in the event class is used ([b08d720](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/b08d720))
+* **Options:** make sure we print the correct label when throwing an exception for a unknown bool flag ([4d8fb0c](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4d8fb0c))
+
+
+### Features
+
+* **Arrays:** add sortByKeyStrLen() helper ([7f9875a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/7f9875a))
+* **FilesAndFolders:** writing a file: try to write files by writing a temp file and overriding the target file to avoid half-written read requests ([e63dbb3](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/e63dbb3))
+
+
+
 ## [1.6.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.6.1%0Dv1.6.0#diff) (2019-07-04)
 
 
