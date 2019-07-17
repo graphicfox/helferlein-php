@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.1%0Dv1.7.0#diff) (2019-07-17)
+
+
+### Bug Fixes
+
+* **Arrays:** Make sure arrayPath walker returns a reference ([4742dbd](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4742dbd))
+
+
+
 # [1.7.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.0%0Dv1.6.1#diff) (2019-07-16)
 
 
