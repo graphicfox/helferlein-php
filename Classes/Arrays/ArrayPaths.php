@@ -176,7 +176,7 @@ class ArrayPaths {
 			throw new HelferleinInvalidArgumentException("The given path was empty!");
 		
 		// Extract the result object by walking the array recursively
-		$walker = function (array &$input, array $path, callable $walker) use ($default) {
+		$walker = function &(array &$input, array $path, callable $walker) use ($default) {
 			list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
 			if (empty($input) || empty($keys)) return $default;
 			$result = [];
