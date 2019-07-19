@@ -106,7 +106,7 @@ class Inflector {
 	
 	/**
 	 * Similar to toSlug() but is able to detect file extensions, and if required a path
-	 * sement which will be ignored while converting the file into a sluggified version.
+	 * segment which will be ignored while converting the file into a sluggified version.
 	 *
 	 * @param string $string     The string to inflect
 	 * @param bool   $expectPath True to expect an filepath with only the basename to inflect.
@@ -286,7 +286,7 @@ class Inflector {
 		// Only apply if the variable does not contain the prefix already
 		$cc = static::toCamelCase(
 			static::sanitizeGetterAndSetterPrefix($string, $options),
-			$options["intelligentSplitting"] === TRUE);
+			isset($options["intelligentSplitting"]) && $options["intelligentSplitting"] === TRUE);
 		return stripos($cc, $prefix) !== FALSE ? $cc : $prefix . $cc;
 	}
 	
@@ -306,7 +306,7 @@ class Inflector {
 	public static function toSetter(string $string, array $options = []): string {
 		return "set" . static::toCamelCase(
 				static::sanitizeGetterAndSetterPrefix($string, $options),
-				$options["intelligentSplitting"] === TRUE);
+				isset($options["intelligentSplitting"]) && $options["intelligentSplitting"] === TRUE);
 	}
 	
 	/**
@@ -316,7 +316,7 @@ class Inflector {
 	 * @param string $string       The string to inflect
 	 * @param array  $options      A configuration array to deactivate specific split settings. @see toArray() for
 	 *                             details. NOTE: In addition to that $options can contain the following:
-	 *                             - sanitize: If false the property sanitazion will be disabled
+	 *                             - sanitize: If false the property sanitation will be disabled
 	 *                             - intelligentSplitting (bool): See Inflector::toArray()
 	 *                             $intelligentSplitting for details
 	 *
@@ -325,29 +325,29 @@ class Inflector {
 	public static function toProperty(string $string, array $options = []): string {
 		return static::toCamelBack(
 			static::sanitizeGetterAndSetterPrefix($string, $options),
-			$options["intelligentSplitting"] === TRUE);
+			isset($options["intelligentSplitting"]) && $options["intelligentSplitting"] === TRUE);
 	}
 	
 	/**
-	 * This method will convert the given string by unifying it. Unify means, it makes it compareable with other
-	 * strings, by removing all special characters, convering everything to lowercase, counting all words and the
-	 * number of their occurence (optional) and sorting them alphabetically. This also means, that the text will no
-	 * longer make sense for humans, but is easy to use for search and comparatison actions.
+	 * This method will convert the given string by unifying it. Unify means, it makes it comparable with other
+	 * strings, by removing all special characters, converting everything to lowercase, counting all words and the
+	 * number of their occurrence (optional) and sorting them alphabetically. This also means, that the text will no
+	 * longer make sense for humans, but is easy to use for search and comparison actions.
 	 *
-	 * @param string $string                  The string to unify
-	 * @param bool   $appendNumberOfOccureces By default words have the number of their occurence added to the result.
-	 *                                        For example "the white fox and the hen" => "and1 fox1 hen1 the2 white1"
-	 *                                        If you don"t want that quanitification you can disable it using this
-	 *                                        option. The result would then be: "and fox hen the white"
+	 * @param string $string                    The string to unify
+	 * @param bool   $appendNumberOfOccurrences By default words have the number of their occurrence added to the
+	 *                                          result. For example "the white fox and the hen" => "and1 fox1 hen1 the2
+	 *                                          white1" If you don"t want that quantification you can disable it using
+	 *                                          this option. The result would then be: "and fox hen the white"
 	 *
 	 *
 	 * @return string
 	 */
-	public static function toComparable(string $string, bool $appendNumberOfOccureces = TRUE): string {
+	public static function toComparable(string $string, bool $appendNumberOfOccurrences = TRUE): string {
 		$parts = static::toArray(static::toFile($string));
 		$parts = array_count_values($parts);
-		if ($appendNumberOfOccureces) {
-			array_walk($parts, function (&$v, $k) use ($appendNumberOfOccureces) {
+		if ($appendNumberOfOccurrences) {
+			array_walk($parts, function (&$v, $k) use ($appendNumberOfOccurrences) {
 				$v = $k . $v;
 			});
 		} else $parts = array_keys($parts);
@@ -393,7 +393,7 @@ class Inflector {
 	 */
 	protected static function sanitizeGetterAndSetterPrefix(string $string, array $options) {
 		// Check if we should sanitize the input or not
-		if ($options["sanitize"] !== FALSE)
+		if (isset($options["sanitize"]) && $options["sanitize"] !== FALSE)
 			$string = preg_replace("/^(set|get|is|has)/", "", $string);
 		unset($options["sanitize"]);
 		return $string;
