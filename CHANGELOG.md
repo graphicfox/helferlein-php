@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.3](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.3%0Dv1.7.2#diff) (2019-07-21)
+
+
+### Bug Fixes
+
+* **Cookies:** fix not working remove cookies ([501fde9](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/501fde9))
+
+
+
 ## [1.7.2](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.2%0Dv1.7.1#diff) (2019-07-19)
 
 
