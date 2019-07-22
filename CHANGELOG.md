@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.4](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.4%0Dv1.7.3#diff) (2019-07-22)
+
+
+### Bug Fixes
+
+* **Arrays:** minor bugfixes and adjustments ([d9f5d83](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/d9f5d83))
+
+
+
 ## [1.7.3](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.7.3%0Dv1.7.2#diff) (2019-07-21)
 
 
