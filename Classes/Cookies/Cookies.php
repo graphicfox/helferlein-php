@@ -8,8 +8,7 @@
 
 namespace Labor\Helferlein\Php\Cookies;
 
-class Cookies
-{
+class Cookies {
 	/**
 	 * Returns the instance of a given cookie.
 	 *
@@ -19,8 +18,7 @@ class Cookies
 	 *
 	 * @return mixed|null
 	 */
-	public static function get(string $identifier, $defaultValue = null)
-	{
+	public static function get(string $identifier, $defaultValue = NULL) {
 		// Check if this cookie exists
 		if (!isset($_COOKIE[$identifier])) return $defaultValue;
 		
@@ -41,15 +39,13 @@ class Cookies
 	 * @param int    $lifetime   -1 means "90 days (legal disclaimer)", 0 means "end of the session"
 	 * @param bool   $httpOnly
 	 */
-	public static function set(string $identifier, $value, int $lifetime = 0, bool $httpOnly = true)
-	{
+	public static function set(string $identifier, $value, int $lifetime = 0, bool $httpOnly = TRUE) {
 		// Prepare value
 		if (!is_string($value) && !is_numeric($value))
 			$value = "@enc@" . base64_encode(json_encode($value));
 		
 		// Prepare lifetime
-		switch ($lifetime)
-		{
+		switch ($lifetime) {
 			case 0:
 				$lifetime = 0;
 				break;
@@ -77,10 +73,16 @@ class Cookies
 	 *
 	 * @param string $identifier
 	 */
-	public static function remove(string $identifier)
-	{
+	public static function remove(string $identifier) {
+		// Prepare url
+		$url = isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] :
+			(isset($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : "localhost");
+		
+		// Prepare secure tag
+		$secure = isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] === "443";
+		
 		unset($_COOKIE[$identifier]);
-		setcookie($identifier, "", time() - 60 * 60 * 24 * 7);
+		setcookie($identifier, NULL, -1, "/", $url, $secure);
 	}
 	
 	/**
@@ -90,8 +92,7 @@ class Cookies
 	 *
 	 * @return bool
 	 */
-	public function has(string $identifier): bool
-	{
+	public function has(string $identifier): bool {
 		return isset($_COOKIE[$identifier]);
 	}
 }
