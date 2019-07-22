@@ -352,12 +352,10 @@ class Arrays {
 	 * This method is used to convert a string into a path array.
 	 * It will also validate already existing path arrays.
 	 *
-	 * By default a dot (.) is used to separate path parts like: "my.array.path" => ["my","array","path"].
+	 * By default a period (.) is used to separate path parts like: "my.array.path" => ["my","array","path"].
 	 * If you require another separator you can set another one by using the $separator parameter.
 	 * In most circumstances it will make more sense just to escape a separator, tho. Do that by using a backslash like:
 	 * "my\.array.path" => ["my.array", "path"].
-	 *
-	 * If an array is given it will be validated for invalid parts before returning it again.
 	 *
 	 * @param array|string $path      The path to parse as described above.
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
@@ -370,7 +368,7 @@ class Arrays {
 	}
 	
 	/**
-	 * This method can be used to merge two path"s together.
+	 * This method can be used to merge two path's together.
 	 * This becomes useful if you want to work with a dynamic part in form of an array
 	 * and a static string part. The result will always be a path array.
 	 * You can specify a separator type for each part of the given path if you merge
@@ -390,8 +388,8 @@ class Arrays {
 	 * @return array
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public static function mergePaths($pathA, $pathB, $separatorA = ".", $separatorB = "."): array {
-		return ArrayPaths::_mergePaths($pathA, $pathB, $separatorA, $separatorB);
+	public static function mergePaths($pathA, $pathB, $separatorA = ".", $separatorB = NULL): array {
+		return ArrayPaths::_mergePaths($pathA, $pathB, $separatorA, $separatorB === NULL ? $separatorA : $separatorB);
 	}
 	
 	/**

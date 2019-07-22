@@ -56,7 +56,7 @@ class ArrayPaths {
 	public static function _parsePath($path, string $separator = "."): array {
 		if (empty($path)) return [];
 		if (!is_string($path) && !is_numeric($path) && !is_array($path))
-			throw new HelferleinInvalidArgumentException("The given path: " . serialize($path) . " is not valid! Only strings, numerics and arrays are supported!");
+			throw new HelferleinInvalidArgumentException("The given path: " . json_encode($path) . " is not valid! Only strings, numbers and arrays are supported!");
 		
 		// Check if the given path array is valid
 		if (is_array($path)) {
@@ -76,7 +76,7 @@ class ArrayPaths {
 			// Parse the path from a string
 			$hasEscapedSeparator = stripos($path, "\\" . $separator) !== FALSE;
 			$path = array_map("trim",
-				preg_split("~(?<!\\\)" . preg_quote($separator, "~") . "~", $path, -1, PREG_SPLIT_NO_EMPTY)
+				preg_split("~(?<!\\\\)" . preg_quote($separator, "~") . "~", $path, -1, PREG_SPLIT_NO_EMPTY)
 			);
 			
 			// Remove escaped separators in created path keys
