@@ -8,9 +8,14 @@
 
 namespace Labor\Helferlein\Php\Options;
 
-use Labor\Helferlein\Php\Arrays\Arrays;
-
 class Options {
+	
+	/**
+	 * Our internal applier as singleton
+	 * @var \Labor\Helferlein\Php\Options\OptionApplier
+	 */
+	protected static $applier;
+	
 	/**
 	 * In general, this does exactly the same as Options::make() but is designed to validate non-array options.
 	 *
@@ -38,8 +43,9 @@ class Options {
 	 */
 	public static function makeSingle(string $paramName, $variable, $definition) {
 		try {
-			$result = static::make(
-				is_null($variable) ? [] : ["@dummySingleParam" => $variable], ["@dummySingleParam" => $definition]);
+			$result = static::getApplier()->apply(
+				is_null($variable) ? [] : ["@dummySingleParam" => $variable], ["@dummySingleParam" => $definition]
+			);
 			return $result["@dummySingleParam"];
 		} catch (InvalidOptionException $e) {
 			throw new InvalidOptionException(str_replace("@dummySingleParam", $paramName, $e->getMessage()));
@@ -62,7 +68,7 @@ class Options {
 	 *
 	 * myFunc("something") => $options will be $defaults
 	 * myFunc("something", ["foo" => 234]) => $options will be ["foo" => 234, "bar" => null]
-	 * myFunc("something", ["rumpel" => 234]) => This will cause Helferlein exception, because the key is not nknown
+	 * myFunc("something", ["rumpel" => 234]) => This will cause a Helferlein exception, because the key is not nknown
 	 * myfunc("something", ["foo" => "rumpel"]) $options will be ["foo" => "rumpel", "bar" => null], because the
 	 * options were merged
 	 *
@@ -75,14 +81,17 @@ class Options {
 	 * In it you can set the following options to validate and filter options as you wish.
 	 *
 	 * - default (mixed|callable): This is the default value to use when the key in $options is empty.
-	 * If not set the default value is NULL. If the default value is a Closure the closure is called
+	 * If not set the option key is required! If the default value is a Closure the closure is called
 	 * and it's result is used as value.
 	 * The callback receives $key, $options, $definition, $path(For child arrays)
 	 *
 	 * - type (string|array): Allows basic type validation of the input. Can either be a string or an array of strings.
-	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number or numeric (both int and
-	 * float) string, resource, null, callable and also class, class-parent and interface names. If multiple values are
-	 * supplied they will be seen as chained via OR operator.
+	 * Possible values are: boolean, bool, true, false, integer, int, double, float, number (int and float) or numeric
+	 * (both int and float + string numbers), string, resource, null, callable and also class, class-parent and
+	 * interface names. If multiple values are supplied they will be seen as chained via OR operator.
+	 *
+	 * - preFilter (callable): A callback which is called BEFORE the type validation takes place and can be used to
+	 * cast the incoming value before validating it's type.
 	 *
 	 * - filter (callable): A callback which is called after the type validation took place and can be used to process
 	 * a given value before the custom validation begins.
@@ -138,251 +147,15 @@ class Options {
 	 * @throws InvalidOptionException
 	 */
 	public static function make(array $input, array $definition, array $options = []): array {
-		// Prepare internals
-		$path = isset($options["@childrensPath"]) &&
-		is_array($options["@childrensPath"]) ? $options["@childrensPath"] : [];
-		$definition = static::prepareAndValidateDefinition($definition, $path);
-		$out = $input;
-		$errors = [];
-		
-		// Apply defaults
-		foreach ($definition as $k => $def) {
-			if (array_key_exists($k, $out)) continue;
-			if (is_object($def["default"]) && $def["default"] instanceof \Closure)
-				$out[$k] = $def["default"]($k, $out, $definition, $path);
-			else
-				$out[$k] = $def["default"];
-		}
-		
-		// Read the input
-		foreach ($out as $k => $v) {
-			$path[] = $k;
-			
-			// Check for unknown keys
-			if (!array_key_exists($k, $definition)) {
-				// Check vor boolean flags
-				if (is_int($k) && array_key_exists($v, $definition) && is_array($definition[$v])
-					&& is_array($definition[$v]["type"]) &&
-					(in_array("bool", $definition[$v]["type"]) || in_array("boolean", $definition[$v]["type"]) ||
-						in_array("true", $definition[$v]["type"]))) {
-					// Handle flag
-					unset($out[$k]);
-					$k = $v;
-					$v = $out[$v] = TRUE;
-				} else if ($options["allowUnknown"] !== TRUE && $options["ignoreUnknown"] !== TRUE) {
-					// Check if this is a numeric value -> Probably a boolean flag
-					if (is_numeric($k) && is_string($v)) {
-						$k = $v;
-						array_pop($path);
-						$path[] = $k;
-					}
-					
-					// Handle not found key
-					$alternativeKey = Arrays::getSimilarKey($definition, $k);
-					$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
-					if (!empty($alternativeKey)) $e .= " Did you mean: \"$alternativeKey\" instead?";
-					$errors[] = $e;
-					array_pop($path);
-					continue;
-				}
-			}
-			
-			// Apply type check
-			if (!empty($definition[$k]["type"])) {
-				if (!static::validateTypesOf($v, $definition[$k]["type"])) {
-					$type = strtolower(gettype($v));
-					if ($type === "object") $type = "Instance of: " . get_class($v);
-					$errors[] = "Invalid option type at: \"" . implode(".", $path) . "\" given; Allowed types: \"" .
-						implode("\", \"", array_keys($definition[$k]["type"])) . "\". Given type: \"" . $type . "\"!";
-					array_pop($path);
-					continue;
-				}
-			}
-			
-			// Apply callback if required
-			if (!empty($definition[$k]["filter"]))
-				$out[$k] = $v = call_user_func($definition[$k]["filter"], $v, $k, $out, $definition, $path);
-			
-			// Apply validator
-			if (!empty($definition[$k]["validator"])) {
-				$validatorResult = call_user_func($definition[$k]["validator"], $v, $k, $out, $definition, $path);
-				if (is_array($validatorResult)) {
-					$definition[$k]["values"] = $validatorResult;
-				} else if ($validatorResult !== TRUE) {
-					if (!is_string($validatorResult)) $errors[] = "Invalid option: \"" . implode(".", $path) . "\" given!";
-					else $errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - " . $validatorResult;
-					array_pop($path);
-					continue;
-				}
-			}
-			
-			// Apply values validator
-			if (!empty($definition[$k]["values"])) {
-				if (!in_array($v, $definition[$k]["values"])) {
-					// Stringify value list
-					$valueStrings = [];
-					foreach ($definition[$k]["values"] as $_v) {
-						if (is_string($valueStrings) || is_numeric($valueStrings)) $valueStrings[] = $_v;
-						else if (is_object($valueStrings)) {
-							if (method_exists($valueStrings, "__toString")) {
-								$s = substr((string)$valueStrings, 0, 50);
-								if (strlen($s) === 50) $s .= "...";
-								$valueStrings[] = $s;
-							} else
-								$valueStrings[] = "Object of type: " . get_class($_v);
-						} else $valueStrings[] = "Value of type: " . gettype($_v);
-					}
-					$valueStrings = array_unique($valueStrings);
-					$errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $valueStrings) . "\"";
-					array_pop($path);
-					continue;
-				}
-			}
-			
-			// Apply children definition
-			if (is_array($v) && !empty($definition[$k]["children"])) {
-				$childOptions = $options;
-				$childOptions["@childrensPath"] = $path;
-				$childrensOut = Options::make($v, $definition[$k]["children"], $childOptions);
-				if (isset($childrensOut["@childrensErrors"])) $errors = array_merge($errors, $childrensOut["@childrensErrors"]);
-				else $out[$k] = $childrensOut;
-			}
-			array_pop($path);
-		}
-		
-		// Check if there were errors
-		if (!empty($errors)) {
-			if (!empty($path)) return ["@childrensErrors" => $errors];
-			throw new InvalidOptionException("Errors while validating options: " . PHP_EOL . " -" . implode(PHP_EOL . " -", $errors));
-		}
-		
-		// Done
-		return $out;
+		return static::getApplier()->apply($input, $definition, $options);
 	}
 	
 	/**
-	 * Internal helper which is used to prepare the given definition.
-	 * It will also check if the definition can be used for our purposes
-	 *
-	 * @param array $definition
-	 * @param array $path
-	 *
-	 * @return array
-	 * @throws InvalidDefinitionException
+	 * Internal helper to get the singleton instance of our internal option applier
+	 * @return \Labor\Helferlein\Php\Options\OptionApplier
 	 */
-	protected static function prepareAndValidateDefinition(array $definition, array $path): array {
-		$definitionPrepared = [];
-		foreach ($definition as $k => $v) {
-			$path[] = $k;
-			
-			// Convert simple definition -> Fast lane
-			if (!is_array($v)) {
-				$definitionPrepared[$k] = ["default" => $v];
-				continue;
-			} else if (is_array($v) && count($v) === 1 && is_numeric(key($v)) && is_array(reset($v))) {
-				$definitionPrepared[$k] = ["default" => reset($v)];
-				continue;
-			}
-			
-			// Validate the given definition
-			$hasConfiguration = FALSE;
-			// Default value
-			if (isset($v["default"])) $hasConfiguration = TRUE;
-			else $v["default"] = NULL;
-			// Validator
-			if (isset($v["validator"])) {
-				$hasConfiguration = TRUE;
-				if (!is_callable($v["validator"]))
-					throw new InvalidDefinitionException(
-						"Definition error at: " . implode(".", $path) . " - The validator is not callable!");
-			}
-			// Filter
-			if (isset($v["filter"])) {
-				$hasConfiguration = TRUE;
-				if (!is_callable($v["filter"]))
-					throw new InvalidDefinitionException(
-						"Definition error at: " . implode(".", $path) . " - The filter is not callable!");
-			}
-			// Value type
-			if (isset($v["type"])) {
-				$hasConfiguration = TRUE;
-				if (!is_array($v["type"])) {
-					if (!is_string($v["type"]))
-						throw new InvalidDefinitionException(
-							"Definition error at: " . implode(".", $path) . " - Type definitions have to be an array or a string!");
-					$v["type"] = [$v["type"]];
-				}
-				
-				// Unify types
-				$typesUnique = [];
-				$defaultTypes = ["boolean", "integer", "double", "float", "string", "array", "object", "resource",
-								 "null", "number", "true", "false", "callable",
-				];
-				foreach (array_values($v["type"]) as $type) {
-					$typeLc = trim(strtolower($type));
-					if (in_array($typeLc, $defaultTypes)) $typesUnique[$typeLc] = TRUE;
-					else if ($typeLc === "numeric") $typesUnique["number"] = TRUE;
-					else if ($typeLc === "int") $typesUnique["integer"] = TRUE;
-					else if ($typeLc === "bool") $typesUnique["boolean"] = TRUE;
-					else $typesUnique[$type] = TRUE;
-				}
-				$v["type"] = $typesUnique;
-			}
-			// Child definition
-			if (isset($v["children"])) {
-				$hasConfiguration = TRUE;
-				if ($v["default"] === NULL) $v["default"] = [];
-				if (!is_array($v["children"]))
-					throw new InvalidDefinitionException(
-						"Definition error at: " . implode(".", $path) . " - Children definitions have to be an array!");
-			}
-			
-			// Kill if $v was an array without configuration
-			if (!$hasConfiguration)
-				throw new InvalidDefinitionException(
-					"Definition error at: " . implode(".", $path) . " - Make sure to wrap arrays in definitions in an outer array!");
-			$definitionPrepared[$k] = $v;
-			array_pop($path);
-		}
-		return $definitionPrepared;
-	}
-	
-	/**
-	 * Internal helper which validates the type of a given value against a list of valid types
-	 *
-	 * @param mixed $value the value to validate
-	 * @param array $types The list of types to validate $value against
-	 *
-	 * @return bool
-	 */
-	protected static function validateTypesOf($value, array $types): bool {
-		$type = strtolower(gettype($value));
-		
-		// Simple lookup
-		if (isset($types[$type])) return TRUE;
-		
-		// Object lookup
-		if ($type === "object") {
-			if (isset($types[get_class($value)])) return TRUE;
-			if (count(array_intersect(class_parents($value), array_keys($types))) > 0) return TRUE;
-			if (count(array_intersect(class_implements($value), array_keys($types))) > 0) return TRUE;
-			
-			// Closure callable lookup
-			if (isset($types["callable"]) && $value instanceof \Closure) return TRUE;
-			return FALSE;
-		}
-		
-		// Boolean lookup
-		if ($type === "boolean") return isset($types[$value ? "true" : "false"]);
-		
-		// Numeric lookup
-		if ($type === "integer" || $type === "double" || $type === "float")
-			return isset($types["number"]);
-		
-		// Callable lookup
-		if (isset($types["callable"])) return is_callable($value);
-		
-		// Nope...
-		return FALSE;
+	protected static function getApplier(): OptionApplier {
+		if (!empty(static::$applier)) return static::$applier;
+		return static::$applier = new OptionApplier();
 	}
 }
