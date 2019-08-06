@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.9.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.9.0%0Dv1.8.0#diff) (2019-08-06)
+
+
+### Features
+
+* **Events:** implement lazy event subscriptions ([b6aa09a](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/b6aa09a))
+* **Events:** implement lazy event subscriptions and event priority ([15f6988](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/15f6988))
+
+
+
 # [1.8.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.8.0%0Dv1.7.4#diff) (2019-07-29)
 
 
