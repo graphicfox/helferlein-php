@@ -26,21 +26,15 @@ interface EventSubscriptionInterface {
 	 *                               empty space, or by using an array of multiple values
 	 * @param string       $method   The name of a method that should be subscribed to the given events.
 	 *                               NOTE: The method has to be public and available on the current instance
-	 * @param array        $options  Additional options for this handler
-	 *                               - params: ARRAY default([]) Additional parameters to be given to the handler.
-	 *                               Please note, that the "on-params" will be given AFTER the "trigger-params".
-	 *                               - priority: INT default(0) The priority of this handler. Positive and negative
-	 *                               values are supported. The highest value is the lowest priority, the lowest
-	 *                               (including negative) value is the highest priority.
-	 *                               - once: BOOL default(FALSE) If set to true, this handler will only be executed
-	 *                               once and then removed from the list. NOTE: This will ONLY remove the handler for a
-	 *                               SINGLE (the currently called) event. If you want your handler to remove itself
-	 *                               from more events, define this in your handler!
+	 * @param array        $options  Additional options
+	 *                               - priority: int (0) Can be used to define the order of handlers when bound on the
+	 *                               same event. 0 is the default the + range is a higher priority (earlier) the - range
+	 *                               is a lower priority (later)
 	 *
 	 * @return \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public function subscribe($events, string $method): EventSubscriptionInterface;
+	public function subscribe($events, string $method, array $options = []): EventSubscriptionInterface;
 	
 	/**
 	 * Returns the event manager instance

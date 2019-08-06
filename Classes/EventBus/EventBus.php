@@ -10,6 +10,7 @@ namespace Labor\Helferlein\Php\EventBus;
 
 
 use Labor\Helferlein\Php\Options\Options;
+use Psr\Container\ContainerInterface;
 
 class EventBus implements EventBusInterface {
 	
@@ -26,6 +27,12 @@ class EventBus implements EventBusInterface {
 	public $eventSubscriptionClass = EventSubscription::class;
 	
 	/**
+	 * The class of the default lazy proxy objects
+	 * @var string
+	 */
+	public $eventSubscriptionLazyProxyClass = LazyEventSubscriptionProxy::class;
+	
+	/**
 	 * The list of registered event handlers by their unique id
 	 * @var array
 	 */
@@ -38,6 +45,32 @@ class EventBus implements EventBusInterface {
 	protected $events = [];
 	
 	/**
+	 * The container instance to load lazy instances with
+	 * @var ContainerInterface|null
+	 */
+	protected $container;
+	
+	/**
+	 * The internal bus which is passed to event's and subscribers
+	 * This should in the most cases be identical with $this
+	 * @var \Labor\Helferlein\Php\EventBus\EventBusInterface
+	 */
+	protected $bus;
+	
+	/**
+	 * If given, can be a callable which replaces the default event factory
+	 * @var callable|null
+	 */
+	protected $eventFactory;
+	
+	/**
+	 * EventBus constructor.
+	 */
+	public function __construct() {
+		$this->bus = $this;
+	}
+	
+	/**
 	 * @inheritdoc
 	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
@@ -48,11 +81,12 @@ class EventBus implements EventBusInterface {
 		// Prepare options
 		$options = Options::make($options, [
 			"event" => [
-				"type" => ["null", EventInterface::class, "callable"],
+				"type"    => ["null", EventInterface::class, "callable"],
+				"default" => NULL,
 			],
 			"args"  => [
-				"type" => ["array"],
-				"default" => []
+				"type"    => ["array"],
+				"default" => [],
 			],
 		]);
 		
@@ -61,19 +95,16 @@ class EventBus implements EventBusInterface {
 		if (empty($this->events[$event])) return $options["args"];
 		
 		// Create event object
-		if ($options["event"] === NULL) $e = new $this->defaultEventClass($this, $event, $options["args"]);
-		else if (is_callable($options["event"])) $e = call_user_func($options["event"], $this, $event, $options["args"]);
-		else if (is_object($options["event"])) $e = $options["event"];
-		else if (is_string($options["event"])) $e = new $options["event"]();
-		if (!$e instanceof EventInterface) throw new InvalidEventException("The given event object/class does not implement the EventInterface!");
-		$e->__initialize($this, $event, $options["args"]);
+		$e = $this->makeEvent($event, $options["event"], $options["args"]);
 		
 		// Loop over all handlers
-		foreach ($this->events[$event] as $handlerId) {
-			$handler = $this->handlers[$handlerId];
-			if (!is_callable($handler)) continue;
-			call_user_func($handler, $e);
-			if ($e->isPropagationStopped()) break;
+		foreach ($this->events[$event] as $priority => $handlers) {
+			foreach ($handlers as $handlerId) {
+				$handler = $this->handlers[$handlerId];
+				if (!is_callable($handler)) continue;
+				call_user_func($handler, $e);
+				if ($e->isPropagationStopped()) break;
+			}
 		}
 		
 		// Done
@@ -84,20 +115,32 @@ class EventBus implements EventBusInterface {
 	 * @inheritdoc
 	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
 	 */
-	public function bind($events, callable $handler) {
-		
-		// Handle multiple events
+	public function bind($events, callable $handler, array $options = []) {
+		// Bind multiple events
 		if (is_array($events)) {
 			foreach ($events as $event)
-				static::bind($event, $handler);
-			return;
+				$this->bind($event, $handler, $options);
+			return $this->bus;
 		}
 		
-		// Handle a single event
+		// Prepare options
+		$options = Options::make($options, [
+			"priority" => [
+				"type"    => ["int"],
+				"default" => 0,
+			],
+		]);
+		
+		// Bind a single event
 		$event = $events;
 		if (!is_string($event)) throw new InvalidEventException("Events can only be defined as string, or array of strings!");
-		$handlerId = static::prepareHandler($event, $handler, TRUE);
-		$this->events[$event][$handlerId] = $handlerId;
+		$handlerId = $this->prepareHandler($event, $handler, TRUE);
+		$this->events[$event][$options["priority"]][$handlerId] = $handlerId;
+		ksort($this->events[$event]);
+		$this->events[$event] = array_reverse($this->events[$event], TRUE);
+		
+		// Done
+		return $this->bus;
 	}
 	
 	/**
@@ -108,39 +151,121 @@ class EventBus implements EventBusInterface {
 		// Handle multiple events
 		if (is_array($events)) {
 			foreach ($events as $event)
-				static::unbind($event, $handler);
-			return;
+				$this->unbind($event, $handler);
+			return $this->bus;
 		}
 		
 		// Handle a single event
 		$event = (string)$events;
 		if (!is_string($event)) throw new InvalidEventException("Events can only be defined as string, or array of strings!");
-		if (empty($this->events[$event])) return;
+		if (empty($this->events[$event])) return $this->bus;
 		
 		if ($handler === NULL) {
 			// Remove all handlers
-			foreach ($this->events[$event] as $handlerId)
-				unset($this->handlers[$handlerId]);
+			foreach ($this->events[$event] as $priority => $handlers)
+				foreach ($handlers as $handlerId)
+					unset($this->handlers[$handlerId]);
+			$this->events[$event] = NULL;
 		} else {
 			// Remove a single handler
-			$handlerId = static::prepareHandler($event, $handler, FALSE);
-			unset($this->events[$event][$handlerId]);
+			$handlerId = $this->prepareHandler($event, $handler, FALSE);
+			foreach ($this->events[$event] as $priority => $handlers) {
+				unset($this->events[$event][$priority][$handlerId]);
+				if (empty($this->events[$event][$priority])) unset($this->events[$event][$priority]);
+			}
 			unset($this->handlers[$handlerId]);
 		}
 		
 		// Cleanup
 		if (empty($this->events[$event]))
 			unset($this->events[$event]);
+		
+		// Done
+		return $this->bus;
 	}
 	
 	/**
 	 * @inheritdoc
-	 * @return mixed|void
 	 */
 	public function addSubscriber(EventSubscriberInterface $instance) {
 		/** @var \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
-		$subscription = new $this->eventSubscriptionClass($this, $instance);
+		$subscription = new $this->eventSubscriptionClass($this->bus, $instance);
 		$instance->subscribeToEvents($subscription);
+		
+		// Done
+		return $this->bus;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public function addLazySubscriber(string $lazySubscriberClass, ?callable $factory = NULL) {
+		// Check if the class implements the required interface
+		if (!in_array(LazyEventSubscriberInterface::class, class_implements($lazySubscriberClass)))
+			throw new InvalidEventException("The given lazy subscriber: " . $lazySubscriberClass . " does not implement the required interface: " . LazyEventSubscriberInterface::class);
+		
+		// Make sure we have a factory
+		if (!is_callable($factory)) {
+			$factory = function (string $className, ?ContainerInterface $container) {
+				if (!is_null($container) && $container->has($className)) return $container->get($className);
+				return new $className();
+			};
+		}
+		
+		// Create an outer wrap around the factory
+		$factoryWrap = function () use ($factory, $lazySubscriberClass) {
+			return call_user_func($factory, $lazySubscriberClass, $this->container);
+		};
+		
+		// Create the proxy
+		$proxy = new $this->eventSubscriptionLazyProxyClass($factoryWrap);
+		/** @var \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
+		$subscription = new $this->eventSubscriptionClass($this->bus, $proxy);
+		call_user_func([$lazySubscriberClass, "subscribeToEvents"], $subscription);
+		
+		// Done
+		return $this;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public function setEventFactory(callable $factory) {
+		$this->eventFactory = $factory;
+		return $this->bus;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public function setContainer(ContainerInterface $container) {
+		$this->container = $container;
+		return $this->bus;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public function setBusInstance(EventBusInterface $bus) {
+		$this->bus = $bus;
+		return $this->bus;
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	public function getHandlersForEvent($event): array {
+		// Skip if there are no handlers for this event
+		if (empty($this->events[$event])) return [];
+		
+		// Flatten the priority list
+		$list = [];
+		foreach ($this->events[$event] as $priority => $handlers)
+			foreach ($handlers as $handlerId)
+				$list[] = $this->handlers[$handlerId];
+		
+		// Done
+		return $list;
 	}
 	
 	/**
@@ -156,14 +281,49 @@ class EventBus implements EventBusInterface {
 	protected function prepareHandler(string $event, $handler, bool $store = FALSE): string {
 		// Handle closures
 		if (is_object($handler)) $handlerId = "a" . spl_object_hash($handler);
-		// Handle array with object reference -> Save power, dont serialize the whole object
-		else if (is_array($handler) && is_object($handler[0]))
+		// Handle array with object reference -> callable like [$obj, "method]
+		// -> Save power, dont serialize the whole object
+		else if (is_array($handler) && count($handler) === 2 && is_object($handler[0]))
 			$handlerId = "b" . md5(serialize([spl_object_hash($handler[0]), $handler[1]]));
-		// Serialize array with classname / methodname
+		// Serialize array with classname / method name
 		else $handlerId = "c" . md5(serialize($handler));
 		$handlerId = $event . $handlerId;
 		if (!$store) return $handlerId;
 		if (!isset($this->handlers[$handlerId])) $this->handlers[$handlerId] = $handler;
 		return $handlerId;
 	}
+	
+	/**
+	 * Internal helper to create a new event instance,
+	 * either using our default method or the supplied custom method
+	 *
+	 * @param string $event      The name of the event to instantiate the object for
+	 * @param mixed  $givenEvent The given event we may want to use
+	 * @param array  $args       The given arguments we should pass to the event
+	 *
+	 * @return \Labor\Helferlein\Php\EventBus\EventInterface
+	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 */
+	protected function makeEvent(string $event, $givenEvent, array $args): EventInterface {
+		// Prepare the default factory
+		$defaultFactory = function () use ($event, $args, $givenEvent) {
+			if ($givenEvent === NULL) return new $this->defaultEventClass();
+			if (is_callable($givenEvent)) return call_user_func($givenEvent, $this->bus, $event, $args);
+			if (is_object($givenEvent)) return $givenEvent;
+			if (is_string($givenEvent)) return new $givenEvent();
+			throw new InvalidEventException("Could not instantiate a new event object!");
+		};
+		
+		// Check if we have a custom factory or use the default
+		if (!empty($this->eventFactory))
+			$e = call_user_func($this->eventFactory, $this->bus, $event, $givenEvent, $args, $defaultFactory, $this->container);
+		else
+			$e = $defaultFactory();
+		if (!$e instanceof EventInterface) throw new InvalidEventException("The given event object/class does not implement the EventInterface!");
+		
+		// Finalize the event
+		$e->__initialize($this, $event, $args);
+		return $e;
+	}
+	
 }
