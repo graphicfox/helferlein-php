@@ -26,7 +26,7 @@ class EventSubscription implements EventSubscriptionInterface {
 	/**
 	 * @inheritDoc
 	 */
-	public function __construct(\Labor\Helferlein\Php\EventBus\EventBusInterface $bus, \Labor\Helferlein\Php\EventBus\EventSubscriberInterface $subscriber) {
+	public function __construct(EventBusInterface $bus, EventSubscriberInterface $subscriber) {
 		$this->bus = $bus;
 		$this->subscriber = $subscriber;
 	}
@@ -34,12 +34,12 @@ class EventSubscription implements EventSubscriptionInterface {
 	/**
 	 * @inheritDoc
 	 */
-	public function subscribe($events, string $method): EventSubscriptionInterface {
-		if (!method_exists($this->subscriber, $method))
+	public function subscribe($events, string $method, array $options = []): EventSubscriptionInterface {
+		if (!$this->subscriber instanceof LazyEventSubscriptionProxy && !method_exists($this->subscriber, $method))
 			throw new HelferleinInvalidArgumentException("Could not subscribe method: \"" . $method .
 				"\" to handle an event, because it is not publicly available");
 		
-		$this->bus->bind($events, [$this->subscriber, $method]);
+		$this->bus->bind($events, [$this->subscriber, $method], $options);
 		return $this;
 	}
 	
