@@ -9,6 +9,8 @@
 namespace Labor\Helferlein\Php\Exceptions;
 
 
-class HelferleinException extends \Exception {
+use Exception;
+
+class HelferleinException extends Exception {
 	
 }

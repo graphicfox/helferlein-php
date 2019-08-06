@@ -9,10 +9,12 @@
 namespace Labor\Helferlein\Php\DateAndTime;
 
 
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Labor\Helferlein\Php\Exceptions\HelferleinException;
 use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 use Labor\Helferlein\Php\Options\Options;
-use phpDocumentor\Reflection\Types\Boolean;
 
 class DateAndTime {
 	protected static $timezone   = "UTC";
@@ -27,8 +29,8 @@ class DateAndTime {
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinException
 	 */
 	public static function setTimeZone($timezone) {
-		if (!$timezone instanceof \DateTimeZone && !is_string($timezone))
-			throw new HelferleinException("Only strings and objects of type: " . \DateTimeZone::class . " are supported!");
+		if (!$timezone instanceof DateTimeZone && !is_string($timezone))
+			throw new HelferleinException("Only strings and objects of type: " . DateTimeZone::class . " are supported!");
 		static::$timezone = $timezone;
 	}
 	
@@ -62,10 +64,10 @@ class DateAndTime {
 	 * @throws HelferleinInvalidArgumentException
 	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
 	 */
-	public static function make($time = "now", array $options = []): \DateTime {
+	public static function make($time = "now", array $options = []): DateTime {
 		
 		// Ignore date time objects
-		if (is_object($time) && $time instanceof \DateTime) return $time;
+		if (is_object($time) && $time instanceof DateTime) return $time;
 		
 		// Prepare options
 		$options = Options::make($options, [
@@ -75,7 +77,7 @@ class DateAndTime {
 		
 		// Convert by string format
 		if (!empty($format) && is_string($time)) {
-			$time = \DateTime::createFromFormat($format, $time, static::makeTimezone($options["timezone"]));
+			$time = DateTime::createFromFormat($format, $time, static::makeTimezone($options["timezone"]));
 			if (!$time) throw new HelferleinInvalidArgumentException('The given time can not be parsed with the given format!');
 			return $time;
 		}
@@ -85,8 +87,8 @@ class DateAndTime {
 		
 		// Try to create using the default
 		try {
-			return new \DateTime($time, static::makeTimezone($options["timezone"]));
-		} catch (\Exception $e) {
+			return new DateTime($time, static::makeTimezone($options["timezone"]));
+		} catch (Exception $e) {
 			$fallbackFormat = "Y-m-d H:i:s";
 			if ($options["format"] !== $fallbackFormat) {
 				$options["format"] = $fallbackFormat;
@@ -108,10 +110,10 @@ class DateAndTime {
 	 * @return \DateTimeZone
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public static function makeTimezone($timezone = NULL): \DateTimeZone {
-		if (is_object($timezone) && $timezone instanceof \DateTimeZone) return $timezone;
+	public static function makeTimezone($timezone = NULL): DateTimeZone {
+		if (is_object($timezone) && $timezone instanceof DateTimeZone) return $timezone;
 		if ($timezone === NULL) return static::makeTimezone($timezone);
-		if (is_string($timezone)) return new \DateTimeZone(trim($timezone));
+		if (is_string($timezone)) return new DateTimeZone(trim($timezone));
 		throw new HelferleinInvalidArgumentException("Invalid timezone given. Only objects and strings are allowed!");
 	}
 	
@@ -129,7 +131,7 @@ class DateAndTime {
 	 * @return \DateTime
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public static function convertTimezone($time, $targetTimezone = NULL, $sourceTimezone = NULL): \DateTime {
+	public static function convertTimezone($time, $targetTimezone = NULL, $sourceTimezone = NULL): DateTime {
 		return static::make($time, ["timezone" => $sourceTimezone])->setTimezone(static::makeTimezone($targetTimezone));
 	}
 	
@@ -144,7 +146,7 @@ class DateAndTime {
 	 * @return bool
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public static function inRange($time, $rangeStart, $rangeEnd, $options = []): Boolean {
+	public static function inRange($time, $rangeStart, $rangeEnd, $options = []): bool {
 		$time = static::make($time, $options);
 		return $time > static::make($rangeStart, $options) && $time < static::make($rangeEnd, $options);
 	}
@@ -165,7 +167,7 @@ class DateAndTime {
 	public static function format($time, string $format, array $options = []): string {
 		$time = static::make($time, $options);
 		$timestamp = $time->getTimestamp();
-		$format = preg_replace_callback('/(?<!\\\\)[F|l|M|D]/s', function ($v) use ($timestamp) {
+		$format = preg_replace_callback('/(?<!\\\\)[FlMD]/s', function ($v) use ($timestamp) {
 			return preg_replace('/(.)/', '\\\\$1',
 				strftime(
 					str_replace(

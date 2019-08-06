@@ -20,7 +20,13 @@
 namespace Labor\Helferlein\Php\FilesAndFolders;
 
 
+use EmptyIterator;
+use FilesystemIterator;
+use Iterator;
 use Labor\Helferlein\Php\Options\Options;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 
 class FilesAndFolders {
 	
@@ -78,7 +84,7 @@ class FilesAndFolders {
 	 *
 	 * @return \Iterator|\RecursiveIteratorIterator|\FilesystemIterator|\SplFileInfo[]
 	 */
-	public static function directoryIterator(string $directory, bool $recursive = FALSE, array $options = []): \Iterator {
+	public static function directoryIterator(string $directory, bool $recursive = FALSE, array $options = []): Iterator {
 		$options = Options::make($options, [
 			"fileRegex"   => [
 				"type"    => "string",
@@ -91,16 +97,16 @@ class FilesAndFolders {
 		]);
 		
 		// Check if we got a directory
-		if (!is_dir($directory)) return new \EmptyIterator();
+		if (!is_dir($directory)) return new EmptyIterator();
 		
 		// Create the iterator
 		$it = $recursive ?
-			new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
-				$options["folderFirst"] ? \RecursiveIteratorIterator::SELF_FIRST : \RecursiveIteratorIterator::CHILD_FIRST) :
-			new \FilesystemIterator($directory);
+			new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+				$options["folderFirst"] ? RecursiveIteratorIterator::SELF_FIRST : RecursiveIteratorIterator::CHILD_FIRST) :
+			new FilesystemIterator($directory);
 		
 		// Apply a file regex if required
-		if (!empty($options["fileRegex"])) return new \RegexIterator($it, $options["fileRegex"]);
+		if (!empty($options["fileRegex"])) return new RegexIterator($it, $options["fileRegex"]);
 		
 		// Done
 		return $it;

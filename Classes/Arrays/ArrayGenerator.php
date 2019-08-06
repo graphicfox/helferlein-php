@@ -9,6 +9,11 @@
 namespace Labor\Helferlein\Php\Arrays;
 
 
+use DOMNode;
+use Iterator;
+use SimpleXMLElement;
+use stdClass;
+
 class ArrayGenerator {
 	/**
 	 * Receives a xml-input and converts it into a multidimensional array
@@ -25,14 +30,14 @@ class ArrayGenerator {
 		if (is_string($input) && stripos(trim($input), "<?xml") === 0)
 			$input = simplexml_load_string($input);
 		// Convert xml objects into arrays
-		if ($input instanceof \DOMNode) $input = simplexml_import_dom($input);
-		if ($input instanceof \SimpleXMLElement) return static::xmlObjectToArray($input);
+		if ($input instanceof DOMNode) $input = simplexml_import_dom($input);
+		if ($input instanceof SimpleXMLElement) return static::xmlObjectToArray($input);
 		
 		// Try fallback if the xml header is missing but the rest is ok
 		if (is_string($input)) {
 			$input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . $input;
 			$input = simplexml_load_string($input);
-			if ($input instanceof \SimpleXMLElement) return static::xmlObjectToArray($input);
+			if ($input instanceof SimpleXMLElement) return static::xmlObjectToArray($input);
 		}
 		throw new ArrayGeneratorException("The given input is not supported as XML array source!");
 	}
@@ -48,9 +53,9 @@ class ArrayGenerator {
 	public static function _fromObject($input): array {
 		if (is_array($input)) return $input;
 		if (empty($input)) return [];
-		if ($input instanceof \DOMNode || $input instanceof \SimpleXMLElement) return static::_fromXml($input);
+		if ($input instanceof DOMNode || $input instanceof SimpleXMLElement) return static::_fromXml($input);
 		// Convert iterator and standard class
-		if ($input instanceof \Iterator || $input instanceof \stdClass) {
+		if ($input instanceof Iterator || $input instanceof stdClass) {
 			$out = [];
 			foreach ($input as $k => $v) $out[$k] = $v;
 			return $out;
@@ -174,7 +179,7 @@ class ArrayGenerator {
 	 *
 	 * @return array
 	 */
-	protected static function xmlObjectToArray(\SimpleXMLElement $xml, array &$parentData = [], string $ns = NULL, array $namespaces = NULL) {
+	protected static function xmlObjectToArray(SimpleXMLElement $xml, array &$parentData = [], string $ns = NULL, array $namespaces = NULL) {
 		if ($ns === NULL) $ns = "";
 		if ($namespaces === NULL) $namespaces = array_keys(array_merge(["" => ""], $xml->getNamespaces(TRUE)));
 		$data = [];

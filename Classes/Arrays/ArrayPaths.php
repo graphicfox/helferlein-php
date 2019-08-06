@@ -8,6 +8,7 @@
 
 namespace Labor\Helferlein\Php\Arrays;
 
+use Exception;
 use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 
 /**
@@ -132,22 +133,22 @@ class ArrayPaths {
 		try {
 			$walker = function (array $input, array $path, callable $walker) {
 				list($keys, $isLastKey) = static::initWalkerStep($input, $path);
-				if (empty($input) || empty($keys)) throw new \Exception();
+				if (empty($input) || empty($keys)) throw new Exception();
 				foreach ($keys as $key) {
-					if (!array_key_exists($key, $input)) throw new \Exception();
+					if (!array_key_exists($key, $input)) throw new Exception();
 					if (!$isLastKey) {
 						if (is_array($input[$key])) {
 							$walker($input[$key], $path, $walker);
 							continue;
 						}
-						throw new \Exception();
+						throw new Exception();
 					}
 				};
 			};
 			$walker($input, $path, $walker);
 			unset($walker);
 			return TRUE;
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			return FALSE;
 		}
 	}

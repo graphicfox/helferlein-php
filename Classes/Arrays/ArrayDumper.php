@@ -20,6 +20,9 @@
 namespace Labor\Helferlein\Php\Arrays;
 
 
+use DOMDocument;
+use SimpleXMLElement;
+
 class ArrayDumper {
 	
 	/**
@@ -38,7 +41,7 @@ class ArrayDumper {
 			throw new ArrayDumperException("Only arrays with a single root node can be converted into xml");
 		
 		// Helper to traverse the given array recursively
-		$walker = function (array $entry, array $path, ?\SimpleXMLElement $xml, callable $walker) {
+		$walker = function (array $entry, array $path, ?SimpleXMLElement $xml, callable $walker) {
 			if (!is_array($entry))
 				throw new ArrayDumperException("All entries have to be arrays, but " . implode(".", $path) . " isn't");
 			
@@ -47,7 +50,7 @@ class ArrayDumper {
 					implode(".", $path) . " doesn't have one");
 			
 			if ($xml === NULL)
-				$child = $xml = new \SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?><" . $entry["tag"] . "/>");
+				$child = $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?><" . $entry["tag"] . "/>");
 			else
 				$child = $xml->addChild($entry["tag"], isset($entry["content"]) ? htmlspecialchars($entry["content"]) : NULL);
 			
@@ -71,7 +74,7 @@ class ArrayDumper {
 		if (!$asString) return $xml;
 		
 		// Format the output
-		$xmlDocument = new \DOMDocument('1.0', "utf-8");
+		$xmlDocument = new DOMDocument('1.0', "utf-8");
 		$xmlDocument->formatOutput = TRUE;
 		$xmlDocument->preserveWhiteSpace = FALSE;
 		$xmlDocument->loadXML($xml->asXML());

@@ -20,6 +20,7 @@
 namespace Labor\Helferlein\Php\Options;
 
 
+use Closure;
 use Labor\Helferlein\Php\Arrays\Arrays;
 
 class OptionApplier {
@@ -218,12 +219,11 @@ class OptionApplier {
 		// Check if we have a default value
 		if (!array_key_exists("default", $def)) {
 			$this->errors[] = "The option key: " . implode(".", $path) . " is required!";
-			var_dump($this->errors);
 			return;
 		}
 		
 		// Apply the default value
-		if ($def["default"] instanceof \Closure)
+		if ($def["default"] instanceof Closure)
 			$list[$k] = call_user_func($def["default"], $k, $list, $def, $path);
 		else $list[$k] = $def["default"];
 	}
@@ -460,7 +460,7 @@ class OptionApplier {
 			if (count(array_intersect(class_implements($value), array_values($types))) > 0) return TRUE;
 			
 			// Closure callable lookup
-			if (in_array(static::TYPE_CALLABLE, $types) && $value instanceof \Closure) return TRUE;
+			if (in_array(static::TYPE_CALLABLE, $types) && $value instanceof Closure) return TRUE;
 			return FALSE;
 		}
 		
