@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.10.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.10.0%0Dv1.9.0#diff) (2019-08-14)
+
+
+### Bug Fixes
+
+* **Inflector:** make sure the sanitization of getter and setter methods can be disabled ([4e7dcbb](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4e7dcbb))
+
+
+### Features
+
+* **Link:** add option to merge two links into each other ([060ab9b](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/060ab9b))
+* **PathsAndLinks:** more reliable url parsing in link factory ([a8791a3](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/a8791a3))
+
+
+
 # [1.9.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.9.0%0Dv1.8.0#diff) (2019-08-06)
 
 
