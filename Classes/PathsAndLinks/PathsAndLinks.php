@@ -80,7 +80,7 @@ class PathsAndLinks {
 	 */
 	public static function classNamespace(string $classname): string {
 		$result = str_replace(DIRECTORY_SEPARATOR, "\\", dirname(str_replace("\\", DIRECTORY_SEPARATOR, $classname)));
-		if($result === ".") return "";
+		if ($result === ".") return "";
 		return $result;
 	}
 	
@@ -170,10 +170,10 @@ class PathsAndLinks {
 				if ($url[0] === "?") {
 					parse_str($url, $url);
 					$url = ["query" => $url];
-				} else throw new InvalidLinkException("Could not convert the given string \"" . $url . "\" into a link, because it is no valid url");
-			} else {
-				$url = parse_url($url);
+				}
 			}
+			if (is_string($url)) $url = parse_url($url);
+			if (!is_array($url)) throw new InvalidLinkException("Could not convert the given string \"" . $url . "\" into a link, because it is no valid url");
 		}
 		
 		// Validate that we now got an array
