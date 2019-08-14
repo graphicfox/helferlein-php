@@ -393,7 +393,7 @@ class Inflector {
 	 */
 	protected static function sanitizeGetterAndSetterPrefix(string $string, array $options) {
 		// Check if we should sanitize the input or not
-		if (isset($options["sanitize"]) && $options["sanitize"] !== FALSE)
+		if (!isset($options["sanitize"]) || $options["sanitize"] !== FALSE)
 			$string = preg_replace("/^(set|get|is|has)/", "", $string);
 		unset($options["sanitize"]);
 		return $string;
