@@ -260,6 +260,22 @@ class Link {
 	}
 	
 	/**
+	 * Merges two link instances into each other and returns the resulting link instance.
+	 * It will only override not existing values with the given link!
+	 *
+	 * @param \Labor\Helferlein\Php\PathsAndLinks\Link $link
+	 *
+	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
+	 */
+	public function mergeWith(Link $link): Link {
+		$l = new self();
+		foreach ([$this, $link] as $o)
+			foreach (get_object_vars($o) as $k => $v)
+				if (empty($l->$k)) $l->$k = $v;
+		return $l;
+	}
+	
+	/**
 	 * Combines the configured link into a string version
 	 *
 	 * @param array $options Options determining the output format
