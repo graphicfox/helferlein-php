@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.11.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.11.0%0Dv1.10.0#diff) (2019-09-03)
+
+
+### Features
+
+* **FilesAndFolders:** make sure that the directory exists before writing a file ([3de1f79](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/3de1f79))
+* **PathsAndLinks:** make sure to always create a fresh url to incorporate server/get array changes. ([abd92a5](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/abd92a5))
+
+
+
 # [1.10.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.10.0%0Dv1.9.0#diff) (2019-08-14)
 
 
