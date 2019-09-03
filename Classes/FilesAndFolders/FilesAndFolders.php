@@ -284,6 +284,10 @@ class FilesAndFolders {
 			throw new FilesAndFoldersException("Could not write file: " . $filename .
 				" - Permission denied! Permissions: " . static::getPermissions($filename));
 		
+		// Make sure the directory exists
+		$dirName = dirname($filename);
+		if (!file_exists($dirName)) static::mkdir($dirName);
+		
 		// Try to write file with save guard
 		$tmpFileName = $filename . ".writing." . md5(microtime(TRUE) . rand(0, 99999999)) . ".txt";
 		$result = @file_put_contents($tmpFileName, $content, $flags);
