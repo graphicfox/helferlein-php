@@ -9,13 +9,6 @@
 namespace Labor\Helferlein\Php\PathsAndLinks;
 
 class PathsAndLinks {
-	
-	/**
-	 * If rendered, this will contain the current url which is displayed in the browser
-	 * @var string
-	 */
-	protected static $currentUrl;
-	
 	/**
 	 * Receives a string (mostly a file path and unifies the slashes for the current filesystem
 	 *
@@ -149,18 +142,14 @@ class PathsAndLinks {
 		
 		// True -> create from current url
 		if ($url === TRUE) {
-			if (empty(static::$currentUrl)) {
-				// Protocol
-				$url = isset($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] . "://" :
-					(isset($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'off') ? 'https://' : 'http://');
-				// Hostname
-				$url .= isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :
-					(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
-				// URI
-				$url .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : "";
-				static::$currentUrl = $url;
-			}
-			$url = static::$currentUrl;
+			// Protocol
+			$url = isset($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] . "://" :
+				(isset($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'], 'off') ? 'https://' : 'http://');
+			// Hostname
+			$url .= isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] :
+				(isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+			// URI
+			$url .= isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : "";
 		}
 		
 		// Convert string url / query to an url array
