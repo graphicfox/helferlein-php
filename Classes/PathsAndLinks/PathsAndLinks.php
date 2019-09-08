@@ -119,6 +119,28 @@ class PathsAndLinks {
 	}
 	
 	/**
+	 * Can be used to calculate a path after a given, relative path has been applied.
+	 * Example: $base = /my/path/to/somewhere $relative = ../../that/leads/anywhere
+	 * Result: /my/path/that/leads/anywhere
+	 *
+	 * @param string $base     The base path to modify using the given $relative path
+	 * @param string $relative The relative path modifier to resolve using the given absolute path
+	 *
+	 * @return string
+	 */
+	public static function absolutePath(string $base, string $relative): string {
+		$parts = explode("/", PathsAndLinks::unifySlashes($base, "/"));
+		$relativeParts = explode("/", PathsAndLinks::unifySlashes($relative, "/"));
+		foreach ($relativeParts as $part) {
+			if (empty($part)) continue;
+			if ($part === ".") continue;
+			if ($part === "..") array_pop($parts);
+			else array_push($parts, $part);
+		}
+		return implode("/", $parts);
+	}
+	
+	/**
 	 * Returns an instance of Link which is a super simple url builder.
 	 *
 	 * Possible values for $url are:
