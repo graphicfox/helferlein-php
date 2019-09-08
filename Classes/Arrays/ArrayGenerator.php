@@ -77,7 +77,7 @@ class ArrayGenerator {
 	 */
 	public static function _fromStringList($input, string $separator = ","): array {
 		if (is_array($input)) return $input;
-		if (empty($input)) return [];
+		if (empty($input) && $input != 0) return [];
 		if (!is_string($input) && !is_numeric($input) && !(is_object($input) && method_exists($input, "__toString")))
 			throw new ArrayGeneratorException("The given input is not supported as STRING array source!");
 		$parts = preg_split("~(?<!\\\)" . preg_quote($separator, "~") . "~", trim($input), -1, PREG_SPLIT_NO_EMPTY);
