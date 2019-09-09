@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.12.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.12.0%0Dv1.11.0#diff) (2019-09-09)
+
+
+### Bug Fixes
+
+* **ArrayGenerator:** make sure that arrays from string list's that receive "0" don't return an empty array, but an array like [0]. ([6b731a5](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/6b731a5))
+
+
+### Features
+
+* **PathsAndLinks:** add new absolutePath() helper to resolve a relative path using a base path. ([cae30cb](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/cae30cb))
+
+
+
 # [1.11.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.11.0%0Dv1.10.0#diff) (2019-09-03)
 
 
