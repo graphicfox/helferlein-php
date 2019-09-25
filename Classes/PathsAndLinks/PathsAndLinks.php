@@ -129,8 +129,8 @@ class PathsAndLinks {
 	 * @return string
 	 */
 	public static function absolutePath(string $base, string $relative): string {
-		$parts = explode("/", PathsAndLinks::unifySlashes($base, "/"));
-		$relativeParts = explode("/", PathsAndLinks::unifySlashes($relative, "/"));
+		$parts = explode("/", rtrim(PathsAndLinks::unifySlashes($base, "/"), "/"));
+		$relativeParts = explode("/", ltrim(PathsAndLinks::unifySlashes($relative, "/"), "/"));
 		foreach ($relativeParts as $part) {
 			if (empty($part)) continue;
 			if ($part === ".") continue;
