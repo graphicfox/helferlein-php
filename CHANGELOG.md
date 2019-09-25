@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.12.1%0Dv1.12.0#diff) (2019-09-25)
+
+
+### Bug Fixes
+
+* **FilesAndFolders:** make sure writeFile() does handle the writing of empty files correctly ([654ee1c](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/654ee1c))
+* **PathsAndLinks:** make sure absolutePath strips slashes before exploding the path ([5b8df79](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/5b8df79))
+
+
+
 # [1.12.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.12.0%0Dv1.11.0#diff) (2019-09-09)
 
 
