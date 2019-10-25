@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.13.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.13.0%0Dv1.12.1#diff) (2019-10-25)
+
+
+### Features
+
+* **Options:** rework the inner logic of the option applier to allow nested option application by making the applier class stateless ([4a68a55](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/4a68a55))
+
+
+
 ## [1.12.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.12.1%0Dv1.12.0#diff) (2019-09-25)
 
 
