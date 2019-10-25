@@ -60,24 +60,6 @@ class OptionApplier {
 	];
 	
 	/**
-	 * The list of errors that occurred while running the last applier
-	 * @var array
-	 */
-	protected $errors = [];
-	
-	/**
-	 * The list of options for this applier
-	 * @var array
-	 */
-	protected $options = [];
-	
-	/**
-	 * Local cache to avoid duplicate definition generation
-	 * @var array
-	 */
-	protected $preparedDefinitions = [];
-	
-	/**
 	 * Can be used in the exact same way as Options::make() is used.
 	 *
 	 * @param array $input
@@ -89,49 +71,33 @@ class OptionApplier {
 	 * @see \Labor\Helferlein\Php\Options\Options::make()
 	 */
 	public function apply(array $input, array $definition, array $options = []): array {
-		// Prepare ourselves
-		$this->reset($options);
+		
+		// Prepare the context
+		$context = new OptionApplierContext();
+		$context->options = $options;
 		
 		// Run the recursive applier
-		$result = $this->applyInternal($input, $definition, []);
+		$result = $this->applyInternal($context, $input, $definition, []);
 		
 		// Check if there were errors
-		if (empty($this->errors)) {
-			$this->reset();
-			return $result;
-		}
-		
-		// Build the error message
-		$errors = "Errors while validating options: " . PHP_EOL . " -" . implode(PHP_EOL . " -", $this->errors);
-		
-		// Reset ourselves
-		$this->reset();
+		if (empty($context->errors)) return $result;
 		
 		// Show them those errors...
-		throw new InvalidOptionException($errors);
-	}
-	
-	/**
-	 * Internal helper to restore the working variables back to an empty state
-	 *
-	 * @param array $options
-	 */
-	protected function reset(array $options = []) {
-		$this->options = $options;
-		$this->errors = [];
-		$this->preparedDefinitions = [];
+		throw new InvalidOptionException("Errors while validating options: " .
+			PHP_EOL . " -" . implode(PHP_EOL . " -", $context->errors));
 	}
 	
 	/**
 	 * Internal helper to apply the definition recursively including the children
 	 *
-	 * @param array $list
-	 * @param array $definition
-	 * @param array $path
+	 * @param \Labor\Helferlein\Php\Options\OptionApplierContext $context
+	 * @param array                                              $list
+	 * @param array                                              $definition
+	 * @param array                                              $path
 	 *
 	 * @return array
 	 */
-	protected function applyInternal(array $list, array $definition, array $path): array {
+	protected function applyInternal(OptionApplierContext $context, array $list, array $definition, array $path): array {
 		$result = $list;
 		$path[] = NULL;
 		
@@ -152,7 +118,7 @@ class OptionApplier {
 			$path[] = $k;
 			
 			// Apply the defaults
-			$this->applyDefaultsFor($result, $k, $def, $path);
+			$this->applyDefaultsFor($context, $result, $k, $def, $path);
 		}
 		
 		// Traverse the list
@@ -164,42 +130,43 @@ class OptionApplier {
 			// Check if we know this key
 			if (!array_key_exists($k, $definition)) {
 				// Ignore if we allow unknown
-				if ($this->options["allowUnknown"] === TRUE || $this->options["ignoreUnknown"] === TRUE) continue;
+				if ($context->options["allowUnknown"] === TRUE || $context->options["ignoreUnknown"] === TRUE) continue;
 				
 				// Handle not found key
 				$alternativeKey = Arrays::getSimilarKey($definition, $k);
 				$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
 				if (!empty($alternativeKey)) $e .= " Did you mean: \"$alternativeKey\" instead?";
-				$this->errors[] = $e;
+				$context->errors[] = $e;
 				continue;
 			}
 			
 			// Prepare the definition
-			$def = $this->prepareDefinition($definition[$k], $path);
+			$def = $this->prepareDefinition($context, $definition[$k], $path);
 			
 			// Apply pre-filter
 			$v = $this->applyPreFilter($k, $v, $def, $path, $result);
 			
 			// Check type-validation
-			if (!$this->checkTypeValidation($v, $def, $path)) continue;
+			if (!$this->checkTypeValidation($context, $v, $def, $path)) continue;
 			
 			// Apply filter
 			$v = $this->applyFilter($k, $v, $def, $path, $result);
 			
 			// Check custom validation
-			if (!$this->checkCustomValidation($k, $v, $def, $path, $result)) continue;
+			if (!$this->checkCustomValidation($context, $k, $v, $def, $path, $result)) continue;
 			
 			// Check value validation
-			if (!$this->checkValueValidation($v, $def, $path)) continue;
+			if (!$this->checkValueValidation($context, $v, $def, $path)) continue;
 			
 			// Handle children
 			if (is_array($v) && isset($def["children"]))
-				$v = $this->applyInternal($v, $def["children"], $path);
+				$v = $this->applyInternal($context, $v, $def["children"], $path);
 			
 			// Add the value to the result
 			$result[$k] = $v;
 		}
 		
+		if (!empty($this->errors)) dbge("IS NOT EMPTY", $this->errors);
 		// Done
 		return $result;
 	}
@@ -207,18 +174,19 @@ class OptionApplier {
 	/**
 	 * Is called to apply the default values for a missing key in the given $list
 	 *
-	 * @param array $list The list to add the default value to
-	 * @param mixed $k    The key to add the default value for
-	 * @param mixed $def  The definition to read the default value from
-	 * @param array $path The path for the error message or the callback
+	 * @param OptionApplierContext $context
+	 * @param array                $list The list to add the default value to
+	 * @param mixed                $k    The key to add the default value for
+	 * @param mixed                $def  The definition to read the default value from
+	 * @param array                $path The path for the error message or the callback
 	 */
-	protected function applyDefaultsFor(array &$list, $k, $def, array $path) {
+	protected function applyDefaultsFor(OptionApplierContext $context, array &$list, $k, $def, array $path) {
 		// Prepare the definition
-		$def = $this->prepareDefinition($def, $path);
+		$def = $this->prepareDefinition($context, $def, $path);
 		
 		// Check if we have a default value
 		if (!array_key_exists("default", $def)) {
-			$this->errors[] = "The option key: " . implode(".", $path) . " is required!";
+			$context->errors[] = "The option key: " . implode(".", $path) . " is required!";
 			return;
 		}
 		
@@ -232,16 +200,17 @@ class OptionApplier {
 	 * Internal helper which is used to convert the given definition into an array.
 	 * It will also validate that only allowed keys are given
 	 *
-	 * @param mixed $def Either a value or an array of the definition
-	 * @param array $path
+	 * @param OptionApplierContext $context
+	 * @param mixed                $def Either a value or an array of the definition
+	 * @param array                $path
 	 *
 	 * @return array
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
 	 */
-	protected function prepareDefinition($def, array $path): array {
+	protected function prepareDefinition(OptionApplierContext $context, $def, array $path): array {
 		// Serve cache value if possible
 		$cacheKey = implode(".", $path);
-		if (isset($this->preparedDefinitions[$cacheKey])) return $this->preparedDefinitions[$cacheKey];
+		if (isset($context->preparedDefinitions[$cacheKey])) return $context->preparedDefinitions[$cacheKey];
 		
 		// Default simple definition -> The value is the default value
 		if (!is_array($def)) $def = ["default" => $def];
@@ -256,7 +225,7 @@ class OptionApplier {
 				"Definition error at: " . implode(".", $path) . "; found invalid keys: " . implode(", ", $unknownConfig) . " - Make sure to wrap arrays in definitions in an outer array!");
 		
 		// Done
-		return $this->preparedDefinitions[$cacheKey] = $def;
+		return $context->preparedDefinitions[$cacheKey] = $def;
 	}
 	
 	/**
@@ -287,14 +256,15 @@ class OptionApplier {
 	/**
 	 * Internal helper to check the "type" validation of the definition
 	 *
-	 * @param mixed $v    The value to validate
-	 * @param array $def  The definition to validate with
-	 * @param array $path The path of the value for the error message
+	 * @param OptionApplierContext $context
+	 * @param mixed                $v    The value to validate
+	 * @param array                $def  The definition to validate with
+	 * @param array                $path The path of the value for the error message
 	 *
 	 * @return bool
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
 	 */
-	protected function checkTypeValidation($v, array $def, array $path): bool {
+	protected function checkTypeValidation(OptionApplierContext $context, $v, array $def, array $path): bool {
 		// Skip, if there is no validation required
 		if (empty($def["type"])) return TRUE;
 		
@@ -317,7 +287,7 @@ class OptionApplier {
 		if (!$this->validateTypesOf($v, $typeList)) {
 			$type = strtolower(gettype($v));
 			if ($type === "object") $type = "Instance of: " . get_class($v);
-			$this->errors[] = "Invalid value type at: \"" . implode(".", $path) . "\" given; Allowed types: \"" .
+			$context->errors[] = "Invalid value type at: \"" . implode(".", $path) . "\" given; Allowed types: \"" .
 				implode("\", \"", array_values($def["type"])) . "\". Given type: \"" . $type . "\"!";
 			array_pop($path);
 			return FALSE;
@@ -353,16 +323,17 @@ class OptionApplier {
 	/**
 	 * Internal helper to apply the given, custom validation for a given value
 	 *
-	 * @param mixed $k    The key of the value to validate for the callback
-	 * @param mixed $v    The value to validate
-	 * @param array $def  The definition to validate with
-	 * @param array $path The path of the value for the error message
-	 * @param array $list The whole list for the callback
+	 * @param OptionApplierContext $context
+	 * @param mixed                $k    The key of the value to validate for the callback
+	 * @param mixed                $v    The value to validate
+	 * @param array                $def  The definition to validate with
+	 * @param array                $path The path of the value for the error message
+	 * @param array                $list The whole list for the callback
 	 *
 	 * @return bool
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
 	 */
-	protected function checkCustomValidation($k, $v, array &$def, array $path, array $list): bool {
+	protected function checkCustomValidation(OptionApplierContext $context, $k, $v, array &$def, array $path, array $list): bool {
 		// Skip, if there is no validation required
 		if (empty($def["validator"])) return TRUE;
 		
@@ -382,22 +353,23 @@ class OptionApplier {
 		}
 		
 		// Create the error message
-		if (!is_string($validatorResult)) $this->errors[] = "Invalid option: \"" . implode(".", $path) . "\" given!";
-		else $this->errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - " . $validatorResult;
+		if (!is_string($validatorResult)) $context->errors[] = "Invalid option: \"" . implode(".", $path) . "\" given!";
+		else $context->errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - " . $validatorResult;
 		return FALSE;
 	}
 	
 	/**
 	 * Internal helper to check the "value" validation of the definition
 	 *
-	 * @param mixed $v    The value to validate
-	 * @param array $def  The definition to validate with
-	 * @param array $path The path of the value for the error message
+	 * @param OptionApplierContext $context
+	 * @param mixed                $v    The value to validate
+	 * @param array                $def  The definition to validate with
+	 * @param array                $path The path of the value for the error message
 	 *
 	 * @return bool
 	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
 	 */
-	protected function checkValueValidation($v, array $def, array $path): bool {
+	protected function checkValueValidation(OptionApplierContext $context, $v, array $def, array $path): bool {
 		// Ignore if there is nothing to do
 		if (empty($def["values"])) return TRUE;
 		
@@ -411,7 +383,7 @@ class OptionApplier {
 		
 		// Build error message
 		$allowedValues = array_map([$this, "stringifyValue"], $def["values"]);
-		$this->errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $allowedValues) . "\"";
+		$context->errors[] = "Validation failed at: \"" . implode(".", $path) . "\" - Only the following values are allowed: \"" . implode("\", \"", $allowedValues) . "\"";
 		return FALSE;
 	}
 	
