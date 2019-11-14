@@ -132,6 +132,13 @@ class OptionApplier {
 				// Ignore if we allow unknown
 				if ($context->options["allowUnknown"] === TRUE || $context->options["ignoreUnknown"] === TRUE) continue;
 				
+				// Rewrite stuff that looks like boolean flags
+				if (is_numeric($k) && is_string($v) && strlen($v) < 100) {
+					$lastPathPart = array_pop($path);
+					$path[] = $v . " (" . $lastPathPart . ")";
+					$k = $v;
+				}
+				
 				// Handle not found key
 				$alternativeKey = Arrays::getSimilarKey($definition, $k);
 				$e = "Invalid option key: \"" . implode(".", $path) . "\" given!";
