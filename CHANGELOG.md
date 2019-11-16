@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.14.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.14.0%0Dv1.13.0#diff) (2019-11-16)
+
+
+### Features
+
+* **Options:** try to handle wrong boolean flags using a more speaking error message ([e4d96c9](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/e4d96c9))
+
+
+
 # [1.13.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.13.0%0Dv1.12.1#diff) (2019-10-25)
 
 
