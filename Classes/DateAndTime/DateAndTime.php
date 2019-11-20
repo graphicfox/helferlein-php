@@ -243,7 +243,7 @@ class DateAndTime {
 	 * @return string
 	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
-	public static function formatDateAndtime($time = "now", array $options = []): string {
+	public static function formatDateAndTime($time = "now", array $options = []): string {
 		return static::formatDate($time, $options) . " " . static::formatTime($time, $options);
 	}
 }
