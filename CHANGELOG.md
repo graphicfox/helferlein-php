@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.14.1%0Dv1.14.0#diff) (2019-11-21)
+
+
+### Bug Fixes
+
+* **DateAndTime:** rename formatDateAndtime to formatDateAndTime ([7dc7d1b](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/7dc7d1b))
+* **DateAndTime:** Use the 24h clock by default as time format ([a865043](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/a865043))
+
+
+
 # [1.14.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.14.0%0Dv1.13.0#diff) (2019-11-16)
 
 
