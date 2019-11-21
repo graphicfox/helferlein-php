@@ -19,7 +19,7 @@ use Labor\Helferlein\Php\Options\Options;
 class DateAndTime {
 	protected static $timezone   = "UTC";
 	protected static $dateFormat = "Y.m.d";
-	protected static $timeFormat = "h:i";
+	protected static $timeFormat = "H:i";
 	
 	/**
 	 * Sets the default timezone
@@ -112,7 +112,7 @@ class DateAndTime {
 	 */
 	public static function makeTimezone($timezone = NULL): DateTimeZone {
 		if (is_object($timezone) && $timezone instanceof DateTimeZone) return $timezone;
-		if ($timezone === NULL) return static::makeTimezone($timezone);
+		if ($timezone === NULL) return static::makeTimezone(static::$timezone);
 		if (is_string($timezone)) return new DateTimeZone(trim($timezone));
 		throw new HelferleinInvalidArgumentException("Invalid timezone given. Only objects and strings are allowed!");
 	}
