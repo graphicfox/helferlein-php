@@ -729,12 +729,16 @@ class Arrays {
 	 * Receives a xml-input and converts it into a multidimensional array
 	 *
 	 * @param string|array|null|\DOMNode|\SimpleXMLElement $input
+	 * @param bool                                         $asAssocArray If this is set to true the result object is
+	 *                                                                   converted to a more readable associative
+	 *                                                                   array. Be careful with this! There might be
+	 *                                                                   sideEffects, like changing paths when the
+	 *                                                                   result array has a changing number of nodes.
 	 *
 	 * @return array
-	 * @throws ArrayGeneratorException
 	 */
-	public static function makeFromXml($input): array {
-		return ArrayGenerator::_fromXml($input);
+	public static function makeFromXml($input, bool $asAssocArray = FALSE): array {
+		return ArrayGenerator::_fromXml($input, $asAssocArray);
 	}
 	
 	/**

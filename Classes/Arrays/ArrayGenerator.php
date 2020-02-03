@@ -19,11 +19,12 @@ class ArrayGenerator {
 	 * Receives a xml-input and converts it into a multidimensional array
 	 *
 	 * @param string|array|null|\DOMNode|\SimpleXMLElement $input
+	 * @param bool                                         $asAssocArray
 	 *
 	 * @return array
-	 * @throws ArrayGeneratorException
+	 * @throws \Labor\Helferlein\Php\Arrays\ArrayGeneratorException
 	 */
-	public static function _fromXml($input): array {
+	public static function _fromXml($input, bool $asAssocArray = FALSE): array {
 		if (is_array($input)) return $input;
 		if (empty($input)) return [];
 		// Convert xml string to an object
@@ -31,15 +32,24 @@ class ArrayGenerator {
 			$input = simplexml_load_string($input);
 		// Convert xml objects into arrays
 		if ($input instanceof DOMNode) $input = simplexml_import_dom($input);
-		if ($input instanceof SimpleXMLElement) return static::xmlObjectToArray($input);
+		if ($input instanceof SimpleXMLElement) $result = static::xmlObjectToArray($input);
 		
 		// Try fallback if the xml header is missing but the rest is ok
-		if (is_string($input)) {
+		else if (is_string($input)) {
 			$input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" . $input;
 			$input = simplexml_load_string($input);
-			if ($input instanceof SimpleXMLElement) return static::xmlObjectToArray($input);
+			if ($input instanceof SimpleXMLElement) $result = static::xmlObjectToArray($input);
 		}
-		throw new ArrayGeneratorException("The given input is not supported as XML array source!");
+		
+		// Check if we failed
+		if (!isset($result))
+			throw new ArrayGeneratorException("The given input is not supported as XML array source!");
+		
+		// Convert to assoc array if required
+		if (!$asAssocArray) return $result;
+		
+		// Convert the array
+		return static::xmlArrayToAssoc($result);
 	}
 	
 	/**
@@ -199,5 +209,43 @@ class ArrayGenerator {
 		$data = ["tag" => $name] + $data;
 		$parentData[] = $data;
 		return $parentData;
+	}
+	
+	/**
+	 * Internal helper that is used to convert an xml result array to a
+	 * more readable associative array. Be careful with this! There might be sideEffects,
+	 * like changing paths when the result array has a changing number of nodes.
+	 *
+	 * @param array $xmlArray The xml array to convert
+	 *
+	 * @return array
+	 */
+	protected static function xmlArrayToAssoc(array $xmlArray): array {
+		$assoc = [];
+		foreach ($xmlArray as $k => $el) {
+			if (!is_array($el)) continue;
+			if (!isset($el["tag"])) dbge($el);
+			$key = $el["tag"];
+			if (is_string($key) && substr($key, 0, 1) === "@") continue;
+			
+			// Check if there is a static content.
+			if (isset($el["content"])) {
+				$assoc[$key][] = $el["content"];
+				continue;
+			}
+			
+			// Recursively convert the children to an assoc array
+			$assoc[$key] = static::xmlArrayToAssoc($el);
+		}
+		
+		// Make sure we make the object as easy to read as possible
+		// We will strip out all wrapper arrays that we don't need, when we only have a single child.
+		$assoc = array_map(function ($el) {
+			if (count($el) === 1 && !is_array(reset($el))) return reset($el);
+			return $el;
+		}, $assoc);
+		
+		// Done
+		return $assoc;
 	}
 }
