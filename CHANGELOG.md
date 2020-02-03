@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.15.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.15.0%0Dv1.14.1#diff) (2020-02-03)
+
+
+### Features
+
+* **Arrays:** add option to parse xml object into an associative array ([93d38e7](https://bitbucket.org/labor-digital/labor-library-helferlein-php/commits/93d38e7))
+
+
+
 ## [1.14.1](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.14.1%0Dv1.14.0#diff) (2019-11-21)
 
 
