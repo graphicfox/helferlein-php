@@ -1,14 +1,26 @@
 {
-	"name": "labor/helferlein-php",
-	"description": "A library of helpers. Nothing more, nothing less",
+	"name": "labor-digital/helferlein-php",
+	"description": "General purpose PHP helpers",
 	"type": "library",
-	"license": "MIT",
+	"license": "Apache-2.0",
 	"authors": [
 		{
+			"name": "LABOR.digital",
+			"email": "info@labor.tools",
+			"homepage": "https://www.labor.digital",
+			"role": "Company"
+		},
+		{
 			"name": "Martin Neundorfer",
-			"email": "m.neundorfer@labor.digital"
+			"email": "m.neundorfer@labor.digital",
+			"homepage": "https://www.neunerlei.eu",
+			"role": "Developer"
 		}
 	],
+	"support": {
+		"issues": "https://github.com/labor-digital/helferlein-php/issues",
+		"source": "https://github.com/labor-digital/helferlein-php"
+	},
 	"require": {
 		"php": ">=7.2",
 		"ext-simplexml": "*",

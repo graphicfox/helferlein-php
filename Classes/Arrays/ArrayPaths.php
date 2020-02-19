@@ -1,9 +1,20 @@
 <?php
 /**
- * User: Martin Neundorfer
- * Date: 21.01.2019
- * Time: 14:59
- * Vendor: LABOR.digital
+ * Copyright 2020 LABOR.digital
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Last modified: 2019.09.12 at 13:38
  */
 
 namespace Labor\Helferlein\Php\Arrays;
@@ -132,7 +143,7 @@ class ArrayPaths {
 		// Check recursive if the path exists
 		try {
 			$walker = function (array $input, array $path, callable $walker) {
-				list($keys, $isLastKey) = static::initWalkerStep($input, $path);
+				[$keys, $isLastKey] = static::initWalkerStep($input, $path);
 				if (empty($input) || empty($keys)) throw new Exception();
 				foreach ($keys as $key) {
 					if (!array_key_exists($key, $input)) throw new Exception();
@@ -178,7 +189,7 @@ class ArrayPaths {
 		
 		// Extract the result object by walking the array recursively
 		$walker = function &(array &$input, array $path, callable $walker) use ($default) {
-			list($keys, $isLastKey, $keyType) = static::initWalkerStep($input, $path);
+			[$keys, $isLastKey, $keyType] = static::initWalkerStep($input, $path);
 			if (empty($input) || empty($keys)) return $default;
 			$result = [];
 			foreach ($keys as $key) {
@@ -228,7 +239,7 @@ class ArrayPaths {
 		
 		// Set the values using the recursion walker
 		$walker = function (array &$input, array $path, callable $walker) use ($value) {
-			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
+			[$keys, $isLastKey] = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				if ($isLastKey) {
 					$input[$key] = $value;
@@ -268,7 +279,7 @@ class ArrayPaths {
 		
 		// Start walker
 		$walker = function (array &$input, array $path, callable $walker) use ($removeEmptyRemains) {
-			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
+			[$keys, $isLastKey] = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				if ($isLastKey) {
 					unset($input[$key]);
@@ -299,7 +310,7 @@ class ArrayPaths {
 		
 		// Start the walker
 		$walker = function (array &$input, array $path, string $pathCallback, callable $walker) use ($separator, $callback) {
-			list($keys, $isLastKey) = static::initWalkerStep($input, $path);
+			[$keys, $isLastKey] = static::initWalkerStep($input, $path);
 			foreach ($keys as $key) {
 				$pathCallbackLocal = ltrim($pathCallback . $separator . $key, $separator);
 				if ($isLastKey) call_user_func_array($callback, [$pathCallbackLocal, &$input[$key]]);
