@@ -1,6 +1,13 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.16.0](https://github.com/labor-digital/helferlein-php/compare/v1.15.0...v1.16.0) (2020-02-19)
+
+
+### Features
+
+* prepare for publication on github and packagist ([5cef7ec](https://github.com/labor-digital/helferlein-php/commit/5cef7ecea3b765d851ad3d25f152a0295c0f046a))
 
 # [1.15.0](https://bitbucket.org/labor-digital/labor-library-helferlein-php/branches/compare/v1.15.0%0Dv1.14.1#diff) (2020-02-03)
 
