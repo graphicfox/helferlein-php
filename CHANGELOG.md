@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See standard-version for commit guidelines.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.17.0](https://github.com/Neunerlei/helferlein-php/compare/v1.16.1...v1.17.0) (2020-02-27)
+
+
+### Features
+
+* update vendor namespace ([be43e58](https://github.com/Neunerlei/helferlein-php/commit/be43e5851e1e1d35b7f2a4431669be809f99c59f))
 
 ### 1.16.1 (2020-02-19)
 
