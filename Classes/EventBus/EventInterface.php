@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020 LABOR.digital
+ * Copyright 2020 Martin Neundorfer (Neunerlei)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last modified: 2019.09.12 at 13:38
+ * Last modified: 2020.02.27 at 10:42
  */
 
 namespace Neunerlei\Helferlein\Php\EventBus;
