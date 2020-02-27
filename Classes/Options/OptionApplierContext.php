@@ -17,7 +17,7 @@
  * Last modified: 2019.09.30 at 20:25
  */
 
-namespace Labor\Helferlein\Php\Options;
+namespace Neunerlei\Helferlein\Php\Options;
 
 
 class OptionApplierContext {

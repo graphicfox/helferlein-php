@@ -17,10 +17,10 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Inflector;
+namespace Neunerlei\Helferlein\Php\Inflector;
 
 
-use Labor\Helferlein\Php\PathsAndLinks\PathsAndLinks;
+use Neunerlei\Helferlein\Php\PathsAndLinks\PathsAndLinks;
 
 class Inflector {
 	/**

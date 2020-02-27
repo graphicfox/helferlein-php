@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
 class Event implements EventInterface {
@@ -30,7 +30,7 @@ class Event implements EventInterface {
 	
 	/**
 	 * The executing event bus
-	 * @var \Labor\Helferlein\Php\EventBus\EventBusInterface
+	 * @var \Neunerlei\Helferlein\Php\EventBus\EventBusInterface
 	 */
 	protected $bus;
 	

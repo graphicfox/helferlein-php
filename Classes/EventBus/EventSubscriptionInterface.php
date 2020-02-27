@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
 interface EventSubscriptionInterface {
@@ -42,8 +42,8 @@ interface EventSubscriptionInterface {
 	 *                               same event. 0 is the default the + range is a higher priority (earlier) the - range
 	 *                               is a lower priority (later)
 	 *
-	 * @return \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @return \Neunerlei\Helferlein\Php\EventBus\EventSubscriptionInterface
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public function subscribe($events, string $method, array $options = []): EventSubscriptionInterface;
 	

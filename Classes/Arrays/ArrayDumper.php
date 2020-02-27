@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Arrays;
+namespace Neunerlei\Helferlein\Php\Arrays;
 
 
 use DOMDocument;
@@ -32,7 +32,7 @@ class ArrayDumper {
 	 * @param bool  $asString
 	 *
 	 * @return \SimpleXMLElement|string
-	 * @throws \Labor\Helferlein\Php\Arrays\ArrayDumperException
+	 * @throws \Neunerlei\Helferlein\Php\Arrays\ArrayDumperException
 	 */
 	public static function _toXml(array $array, bool $asString = FALSE) {
 		

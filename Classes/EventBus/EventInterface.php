@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
 interface EventInterface {
@@ -26,9 +26,9 @@ interface EventInterface {
 	 * To keep the constructor clean of elements to inject we call the __initialize method before we
 	 * dispatch the event to the handlers. This should make the creation of child event classes a lot easier
 	 *
-	 * @param \Labor\Helferlein\Php\EventBus\EventBusInterface $bus      The instance of the calling event bus
-	 * @param string                                           $eventKey The name of the current event
-	 * @param array                                            $args     Arguments that were passed to this event
+	 * @param \Neunerlei\Helferlein\Php\EventBus\EventBusInterface $bus      The instance of the calling event bus
+	 * @param string                                               $eventKey The name of the current event
+	 * @param array                                                $args     Arguments that were passed to this event
 	 *
 	 * @return mixed
 	 */
@@ -36,7 +36,7 @@ interface EventInterface {
 	
 	/**
 	 * Returns the instance of the calling event bus
-	 * @return \Labor\Helferlein\Php\EventBus\EventBusInterface
+	 * @return \Neunerlei\Helferlein\Php\EventBus\EventBusInterface
 	 */
 	public function getBus(): EventBusInterface;
 	
@@ -66,7 +66,7 @@ interface EventInterface {
 	 *
 	 * @param array $args
 	 *
-	 * @return \Labor\Helferlein\Php\EventBus\EventInterface
+	 * @return \Neunerlei\Helferlein\Php\EventBus\EventInterface
 	 */
 	public function setArgs(array $args): EventInterface;
 	

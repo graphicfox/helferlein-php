@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Exceptions;
+namespace Neunerlei\Helferlein\Php\Exceptions;
 
 
 class HelferleinNotImplementedException extends HelferleinException {

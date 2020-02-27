@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
 class LazyEventSubscriptionProxy implements EventSubscriberInterface {
@@ -45,7 +45,7 @@ class LazyEventSubscriptionProxy implements EventSubscriberInterface {
 	/**
 	 * Fake the interface...
 	 *
-	 * @param \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription
+	 * @param \Neunerlei\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription
 	 */
 	public function subscribeToEvents(EventSubscriptionInterface $subscription) {
 		// Silence

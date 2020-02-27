@@ -17,15 +17,15 @@
  * Last modified: 2019.11.21 at 00:20
  */
 
-namespace Labor\Helferlein\Php\DateAndTime;
+namespace Neunerlei\Helferlein\Php\DateAndTime;
 
 
 use DateTime;
 use DateTimeZone;
 use Exception;
-use Labor\Helferlein\Php\Exceptions\HelferleinException;
-use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
-use Labor\Helferlein\Php\Options\Options;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinException;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
+use Neunerlei\Helferlein\Php\Options\Options;
 
 class DateAndTime {
 	protected static $timezone   = "UTC";
@@ -37,7 +37,7 @@ class DateAndTime {
 	 *
 	 * @param \DateTimeZone|string $timezone
 	 *
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinException
 	 */
 	public static function setTimeZone($timezone) {
 		if (!$timezone instanceof DateTimeZone && !is_string($timezone))
@@ -73,7 +73,7 @@ class DateAndTime {
 	 *
 	 * @return \DateTime
 	 * @throws HelferleinInvalidArgumentException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
 	 */
 	public static function make($time = "now", array $options = []): DateTime {
 		
@@ -119,7 +119,7 @@ class DateAndTime {
 	 * @param $timezone
 	 *
 	 * @return \DateTimeZone
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function makeTimezone($timezone = NULL): DateTimeZone {
 		if (is_object($timezone) && $timezone instanceof DateTimeZone) return $timezone;
@@ -140,7 +140,7 @@ class DateAndTime {
 	 *                                                      The same rules apply than with $targetTimezone
 	 *
 	 * @return \DateTime
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function convertTimezone($time, $targetTimezone = NULL, $sourceTimezone = NULL): DateTime {
 		return static::make($time, ["timezone" => $sourceTimezone])->setTimezone(static::makeTimezone($targetTimezone));
@@ -155,7 +155,7 @@ class DateAndTime {
 	 * @param array                         $options    The same options as static::make()
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function inRange($time, $rangeStart, $rangeEnd, $options = []): bool {
 		$time = static::make($time, $options);
@@ -173,7 +173,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function format($time, string $format, array $options = []): string {
 		$time = static::make($time, $options);
@@ -200,7 +200,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function formatMysql($time = "now", array $options = []): string {
 		return static::make($time, $options)->format('Y-m-d H:i:s');
@@ -213,7 +213,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function formatJavascript($time = "now", array $options = []): string {
 		return static::make($time, $options)->format("D M d Y H:i:s O");
@@ -226,7 +226,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function formatTime($time = "now", array $options = []): string {
 		return static::format($time, static::$timeFormat, $options);
@@ -239,7 +239,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function formatDate($time = "now", array $options = []): string {
 		return static::format($time, static::$dateFormat, $options);
@@ -252,7 +252,7 @@ class DateAndTime {
 	 * @param array                         $options The same options as static::make()
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function formatDateAndTime($time = "now", array $options = []): string {
 		return static::formatDate($time, $options) . " " . static::formatTime($time, $options);

@@ -17,13 +17,13 @@
  * Last modified: 2019.09.17 at 14:44
  */
 
-namespace Labor\Helferlein\Php\FilesAndFolders;
+namespace Neunerlei\Helferlein\Php\FilesAndFolders;
 
 
 use EmptyIterator;
 use FilesystemIterator;
 use Iterator;
-use Labor\Helferlein\Php\Options\Options;
+use Neunerlei\Helferlein\Php\Options\Options;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -118,7 +118,7 @@ class FilesAndFolders {
 	 * @param string $filename The name of the file to get the permissions for
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 */
 	public static function getPermissions(string $filename): string {
 		if (!file_exists($filename))
@@ -142,7 +142,7 @@ class FilesAndFolders {
 	 * @param string $mode      The unix permissions to set like 0777
 	 * @param bool   $recursive default TRUE: FALSE if directories should NOT be traversed recursively
 	 *
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 */
 	public static function setPermissions(string $filename, string $mode, bool $recursive = TRUE) {
 		if (stripos(PHP_OS, "win") === 0) return;
@@ -169,7 +169,7 @@ class FilesAndFolders {
 	 * @param string $filename
 	 *
 	 * @return int
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 */
 	public static function getGroup(string $filename): int {
 		if (!file_exists($filename))
@@ -190,7 +190,7 @@ class FilesAndFolders {
 	 * @param string|int $group     The unix group to set for the file
 	 * @param bool       $recursive default TRUE: FALSE if directories should NOT be traversed recursively
 	 *
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 */
 	public static function setGroup(string $filename, $group, bool $recursive = TRUE) {
 		if (stripos(PHP_OS, "win") === 0) return;
@@ -221,7 +221,7 @@ class FilesAndFolders {
 	 * @param string $filename
 	 *
 	 * @return string
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 */
 	public static function readFile(string $filename): string {
 		
@@ -248,7 +248,7 @@ class FilesAndFolders {
 	 * @param null   $context
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 * @see \file()
 	 */
 	public static function readFileAsLines(string $filename, $flags = NULL, $context = NULL): array {
@@ -275,7 +275,7 @@ class FilesAndFolders {
 	 * @param string $content
 	 * @param int    $flags
 	 *
-	 * @throws \Labor\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
+	 * @throws \Neunerlei\Helferlein\Php\FilesAndFolders\FilesAndFoldersException
 	 * @see \file_put_contents()
 	 */
 	public static function writeFile(string $filename, string $content, int $flags = 0) {

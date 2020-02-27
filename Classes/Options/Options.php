@@ -17,13 +17,13 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Options;
+namespace Neunerlei\Helferlein\Php\Options;
 
 class Options {
 	
 	/**
 	 * Our internal applier as singleton
-	 * @var \Labor\Helferlein\Php\Options\OptionApplier
+	 * @var \Neunerlei\Helferlein\Php\Options\OptionApplier
 	 */
 	protected static $applier;
 	
@@ -163,7 +163,7 @@ class Options {
 	
 	/**
 	 * Internal helper to get the singleton instance of our internal option applier
-	 * @return \Labor\Helferlein\Php\Options\OptionApplier
+	 * @return \Neunerlei\Helferlein\Php\Options\OptionApplier
 	 */
 	protected static function getApplier(): OptionApplier {
 		if (!empty(static::$applier)) return static::$applier;

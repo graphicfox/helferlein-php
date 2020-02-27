@@ -17,7 +17,7 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
 use Psr\Container\ContainerInterface;
@@ -65,7 +65,7 @@ interface EventBusInterface {
 	/**
 	 * Adds the handlers registered in an event subscriber to the event bus
 	 *
-	 * @param \Labor\Helferlein\Php\EventBus\EventSubscriberInterface $instance
+	 * @param \Neunerlei\Helferlein\Php\EventBus\EventSubscriberInterface $instance
 	 *
 	 * @return $this
 	 */
@@ -117,7 +117,7 @@ interface EventBusInterface {
 	 * Can be used to override the event bus instance that is passed to events or subscriber instances.
 	 * This becomes quite useful if you want to use the bus inside a wrapper class.
 	 *
-	 * @param \Labor\Helferlein\Php\EventBus\EventBusInterface $bus
+	 * @param \Neunerlei\Helferlein\Php\EventBus\EventBusInterface $bus
 	 *
 	 * @return $this
 	 */

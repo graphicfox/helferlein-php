@@ -17,11 +17,11 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\PathsAndLinks;
+namespace Neunerlei\Helferlein\Php\PathsAndLinks;
 
 
-use Labor\Helferlein\Php\Inflector\Inflector;
-use Labor\Helferlein\Php\Options\Options;
+use Neunerlei\Helferlein\Php\Inflector\Inflector;
+use Neunerlei\Helferlein\Php\Options\Options;
 
 class Link {
 	
@@ -70,7 +70,7 @@ class Link {
 	 *
 	 * @param array $config
 	 *
-	 * @throws \Labor\Helferlein\Php\PathsAndLinks\InvalidLinkException
+	 * @throws \Neunerlei\Helferlein\Php\PathsAndLinks\InvalidLinkException
 	 */
 	public function __construct(array $config = []) {
 		foreach (["scheme", "host", "port", "user", "pass", "path", "fragment"] as $key) {
@@ -219,7 +219,7 @@ class Link {
 	 * @param string $key
 	 * @param mixed  $value
 	 *
-	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
+	 * @return \Neunerlei\Helferlein\Php\PathsAndLinks\Link
 	 */
 	public function addToQuery(string $key, $value): Link {
 		$this->query[$key] = $value;
@@ -231,7 +231,7 @@ class Link {
 	 *
 	 * @param string $key
 	 *
-	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
+	 * @return \Neunerlei\Helferlein\Php\PathsAndLinks\Link
 	 */
 	public function removeFromQuery(string $key): Link {
 		unset($this->query[$key]);
@@ -263,9 +263,9 @@ class Link {
 	 * Merges two link instances into each other and returns the resulting link instance.
 	 * It will only override not existing values with the given link!
 	 *
-	 * @param \Labor\Helferlein\Php\PathsAndLinks\Link $link
+	 * @param \Neunerlei\Helferlein\Php\PathsAndLinks\Link $link
 	 *
-	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
+	 * @return \Neunerlei\Helferlein\Php\PathsAndLinks\Link
 	 */
 	public function mergeWith(Link $link): Link {
 		$l = new self();

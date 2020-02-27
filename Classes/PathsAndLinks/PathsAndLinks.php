@@ -17,7 +17,7 @@
  * Last modified: 2019.09.23 at 17:48
  */
 
-namespace Labor\Helferlein\Php\PathsAndLinks;
+namespace Neunerlei\Helferlein\Php\PathsAndLinks;
 
 class PathsAndLinks {
 	/**
@@ -160,10 +160,10 @@ class PathsAndLinks {
 	 * array: The result of parse_url() as an array
 	 * Link: Another instance of a link to clone into a new instance
 	 *
-	 * @param null|boolean|string|\Labor\Helferlein\Php\PathsAndLinks\Link|array $url
+	 * @param null|boolean|string|\Neunerlei\Helferlein\Php\PathsAndLinks\Link|array $url
 	 *
-	 * @return \Labor\Helferlein\Php\PathsAndLinks\Link
-	 * @throws \Labor\Helferlein\Php\PathsAndLinks\InvalidLinkException
+	 * @return \Neunerlei\Helferlein\Php\PathsAndLinks\Link
+	 * @throws \Neunerlei\Helferlein\Php\PathsAndLinks\InvalidLinkException
 	 */
 	public static function getLink($url = NULL): Link {
 		

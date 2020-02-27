@@ -1,5 +1,5 @@
 {
-	"name": "labor-digital/helferlein-php",
+	"name": "neunerlei/helferlein-php",
 	"description": "General purpose PHP helpers",
 	"type": "library",
 	"license": "Apache-2.0",
@@ -12,14 +12,14 @@
 		},
 		{
 			"name": "Martin Neundorfer",
-			"email": "m.neundorfer@labor.digital",
+			"email": "code@neunerlei.eu",
 			"homepage": "https://www.neunerlei.eu",
 			"role": "Developer"
 		}
 	],
 	"support": {
-		"issues": "https://github.com/labor-digital/helferlein-php/issues",
-		"source": "https://github.com/labor-digital/helferlein-php"
+		"issues": "https://github.com/neunerlei/helferlein-php/issues",
+		"source": "https://github.com/neunerlei/helferlein-php"
 	},
 	"require": {
 		"php": ">=7.2",
@@ -28,7 +28,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Labor\\Helferlein\\Php\\": "Classes"
+			"Neunerlei\\Helferlein\\Php\\": "Classes"
 		}
 	},
 	"version": "1.16.1"

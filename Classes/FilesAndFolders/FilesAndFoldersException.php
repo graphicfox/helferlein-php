@@ -17,10 +17,10 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\FilesAndFolders;
+namespace Neunerlei\Helferlein\Php\FilesAndFolders;
 
 
-use Labor\Helferlein\Php\Exceptions\HelferleinException;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinException;
 
 class FilesAndFoldersException extends HelferleinException {
 	

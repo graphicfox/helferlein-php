@@ -17,12 +17,12 @@
  * Last modified: 2020.02.05 at 17:18
  */
 
-namespace Labor\Helferlein\Php\Arrays;
+namespace Neunerlei\Helferlein\Php\Arrays;
 
 
-use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
-use Labor\Helferlein\Php\Inflector\Inflector;
-use Labor\Helferlein\Php\Options\Options;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
+use Neunerlei\Helferlein\Php\Inflector\Inflector;
+use Neunerlei\Helferlein\Php\Options\Options;
 
 class Arrays {
 	
@@ -157,7 +157,7 @@ class Arrays {
 	 * @param array $args
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function attach(...$args): array {
 		$_args = $args;
@@ -315,7 +315,7 @@ class Arrays {
 	 *
 	 * @return array
 	 * @throws HelferleinInvalidArgumentException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
 	 */
 	public static function sortBy(array $array, string $key, array $options = []): array {
 		$options = Options::make($options, [
@@ -372,7 +372,7 @@ class Arrays {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function parsePath($path, string $separator = "."): array {
 		return ArrayPaths::_parsePath($path, $separator);
@@ -397,7 +397,7 @@ class Arrays {
 	 * @param string       $separatorB The separator for string paths in $pathB
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function mergePaths($pathA, $pathB, $separatorA = ".", $separatorB = NULL): array {
 		return ArrayPaths::_mergePaths($pathA, $pathB, $separatorA, $separatorB === NULL ? $separatorA : $separatorB);
@@ -411,7 +411,7 @@ class Arrays {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function hasPath($input, $path, string $separator = "."): bool {
 		return ArrayPaths::_has($input, $path, $separator);
@@ -430,7 +430,7 @@ class Arrays {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return array|mixed|null
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function &getPath(&$input, $path, $default = NULL, string $separator = ".") {
 		return ArrayPaths::_get($input, $path, $default, $separator);
@@ -446,7 +446,7 @@ class Arrays {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return void
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function setPath(array &$input, $path, $value, string $separator = ".") {
 		ArrayPaths::_set($input, $path, $value, $separator);
@@ -470,7 +470,7 @@ class Arrays {
 	 *                                         child was removed from a tree.
 	 *
 	 * @return void
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function removePath(array &$input, $path, array $options = []) {
 		$options = Options::make($options, [
@@ -494,7 +494,7 @@ class Arrays {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return void
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function filter(array &$input, $path, callable $callback, string $separator = ".") {
 		ArrayPaths::_filter($input, $path, $callback, $separator);
@@ -579,7 +579,7 @@ class Arrays {
 	 *                                keys.
 	 *
 	 * @return array|null
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function &getList(array &$input, array $valueKeys, string $keyKey = "", array $options = []) {
 		$options = Options::make($options, [
@@ -628,8 +628,8 @@ class Arrays {
 	 *                          to traverse arrays set this to TRUE
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
 	 */
 	public static function flatten(iterable $input, array $options = []): array {
 		// Prepare options
@@ -707,8 +707,8 @@ class Arrays {
 	 *                          to traverse arrays set this to TRUE
 	 *
 	 * @return iterable
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
 	 */
 	public static function mapRecursive(iterable $input, callable $callback, array $options = []): iterable {
 		// Prepare options

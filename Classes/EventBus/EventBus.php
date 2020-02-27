@@ -17,10 +17,10 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
-use Labor\Helferlein\Php\Options\Options;
+use Neunerlei\Helferlein\Php\Options\Options;
 use Psr\Container\ContainerInterface;
 
 class EventBus implements EventBusInterface {
@@ -64,7 +64,7 @@ class EventBus implements EventBusInterface {
 	/**
 	 * The internal bus which is passed to event's and subscribers
 	 * This should in the most cases be identical with $this
-	 * @var \Labor\Helferlein\Php\EventBus\EventBusInterface
+	 * @var \Neunerlei\Helferlein\Php\EventBus\EventBusInterface
 	 */
 	protected $bus;
 	
@@ -83,9 +83,9 @@ class EventBus implements EventBusInterface {
 	
 	/**
 	 * @inheritdoc
-	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
+	 * @throws \Neunerlei\Helferlein\Php\EventBus\InvalidEventException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
 	 */
 	public function emit($event, array $options = []) {
 		
@@ -124,7 +124,7 @@ class EventBus implements EventBusInterface {
 	
 	/**
 	 * @inheritdoc
-	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 * @throws \Neunerlei\Helferlein\Php\EventBus\InvalidEventException
 	 */
 	public function bind($events, callable $handler, array $options = []) {
 		// Bind multiple events
@@ -156,7 +156,7 @@ class EventBus implements EventBusInterface {
 	
 	/**
 	 * @inheritdoc
-	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 * @throws \Neunerlei\Helferlein\Php\EventBus\InvalidEventException
 	 */
 	public function unbind($events, callable $handler = NULL) {
 		// Handle multiple events
@@ -199,7 +199,7 @@ class EventBus implements EventBusInterface {
 	 * @inheritdoc
 	 */
 	public function addSubscriber(EventSubscriberInterface $instance) {
-		/** @var \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
+		/** @var \Neunerlei\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
 		$subscription = new $this->eventSubscriptionClass($this->bus, $instance);
 		$instance->subscribeToEvents($subscription);
 		
@@ -230,7 +230,7 @@ class EventBus implements EventBusInterface {
 		
 		// Create the proxy
 		$proxy = new $this->eventSubscriptionLazyProxyClass($factoryWrap);
-		/** @var \Labor\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
+		/** @var \Neunerlei\Helferlein\Php\EventBus\EventSubscriptionInterface $subscription */
 		$subscription = new $this->eventSubscriptionClass($this->bus, $proxy);
 		call_user_func([$lazySubscriberClass, "subscribeToEvents"], $subscription);
 		
@@ -312,8 +312,8 @@ class EventBus implements EventBusInterface {
 	 * @param mixed  $givenEvent The given event we may want to use
 	 * @param array  $args       The given arguments we should pass to the event
 	 *
-	 * @return \Labor\Helferlein\Php\EventBus\EventInterface
-	 * @throws \Labor\Helferlein\Php\EventBus\InvalidEventException
+	 * @return \Neunerlei\Helferlein\Php\EventBus\EventInterface
+	 * @throws \Neunerlei\Helferlein\Php\EventBus\InvalidEventException
 	 */
 	protected function makeEvent(string $event, $givenEvent, array $args): EventInterface {
 		// Prepare the default factory

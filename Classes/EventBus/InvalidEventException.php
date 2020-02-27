@@ -17,10 +17,10 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\EventBus;
+namespace Neunerlei\Helferlein\Php\EventBus;
 
 
-use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 
 class InvalidEventException extends HelferleinInvalidArgumentException {
 	

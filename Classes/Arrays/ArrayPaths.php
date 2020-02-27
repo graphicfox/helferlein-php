@@ -17,16 +17,16 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Arrays;
+namespace Neunerlei\Helferlein\Php\Arrays;
 
 use Exception;
-use Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException;
 
 /**
  * Class ArrayPaths
  *
  * This is functionality which was extracted from Arrays in order to keep the class somewhat short...
- * @package Labor\Helferlein\Php\Arrays
+ * @package Neunerlei\Helferlein\Php\Arrays
  * @internal
  */
 class ArrayPaths {
@@ -63,7 +63,7 @@ class ArrayPaths {
 	 * @param string $separator
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _parsePath($path, string $separator = "."): array {
 		if (empty($path)) return [];
@@ -110,7 +110,7 @@ class ArrayPaths {
 	 * @param string $separatorB
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _mergePaths($pathA, $pathB, $separatorA = ".", $separatorB = "."): array {
 		$pathA = static::_parsePath($pathA, $separatorA);
@@ -125,7 +125,7 @@ class ArrayPaths {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _has($input, $path, string $separator = "."): bool {
 		// Ignore empty inputs
@@ -171,7 +171,7 @@ class ArrayPaths {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return array|mixed|null
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function &_get(&$input, $path, $default = NULL, string $separator = ".") {
 		// Ignore empty inputs
@@ -224,7 +224,7 @@ class ArrayPaths {
 	 *
 	 * @return void
 	 *
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _set(array &$input, $path, $value, string $separator = ".") {
 		// Fastlane for simple paths
@@ -264,7 +264,7 @@ class ArrayPaths {
 	 *                                         the lowest child was removed from a tree.
 	 *
 	 * @return void
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _remove(array &$input, $path, string $separator = ".", bool $removeEmptyRemains = TRUE) {
 		// Ignore empty inputs
@@ -301,7 +301,7 @@ class ArrayPaths {
 	 * @param string       $separator Default: "." Can be set to any string you want to use as separator of path parts.
 	 *
 	 * @return void
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function _filter(array &$input, $path, callable $callback, string $separator = ".") {
 		// Convert the path into an array
@@ -332,7 +332,7 @@ class ArrayPaths {
 	 * @param bool       $gatherLists True to gather lists by keys instead of overwriting already set keys.
 	 *
 	 * @return array|null
-	 * @throws \Labor\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
+	 * @throws \Neunerlei\Helferlein\Php\Exceptions\HelferleinInvalidArgumentException
 	 */
 	public static function &_getList(array &$input, array $valueKeys, string $keyKey = "", $path = "*",
 									 $default = NULL, string $separator = ".", bool $gatherLists = FALSE) {

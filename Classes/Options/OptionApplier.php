@@ -17,11 +17,11 @@
  * Last modified: 2019.11.14 at 12:54
  */
 
-namespace Labor\Helferlein\Php\Options;
+namespace Neunerlei\Helferlein\Php\Options;
 
 
 use Closure;
-use Labor\Helferlein\Php\Arrays\Arrays;
+use Neunerlei\Helferlein\Php\Arrays\Arrays;
 
 class OptionApplier {
 	protected const ALLOWED_DEFINITION_KEYS = ["default", "validator", "preFilter", "filter", "type", "children", "values"];
@@ -67,8 +67,8 @@ class OptionApplier {
 	 * @param array $options
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Options\InvalidOptionException
-	 * @see \Labor\Helferlein\Php\Options\Options::make()
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidOptionException
+	 * @see \Neunerlei\Helferlein\Php\Options\Options::make()
 	 */
 	public function apply(array $input, array $definition, array $options = []): array {
 		
@@ -90,10 +90,10 @@ class OptionApplier {
 	/**
 	 * Internal helper to apply the definition recursively including the children
 	 *
-	 * @param \Labor\Helferlein\Php\Options\OptionApplierContext $context
-	 * @param array                                              $list
-	 * @param array                                              $definition
-	 * @param array                                              $path
+	 * @param \Neunerlei\Helferlein\Php\Options\OptionApplierContext $context
+	 * @param array                                                  $list
+	 * @param array                                                  $definition
+	 * @param array                                                  $path
 	 *
 	 * @return array
 	 */
@@ -212,7 +212,7 @@ class OptionApplier {
 	 * @param array                $path
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function prepareDefinition(OptionApplierContext $context, $def, array $path): array {
 		// Serve cache value if possible
@@ -245,7 +245,7 @@ class OptionApplier {
 	 * @param array $list The whole list for the callback
 	 *
 	 * @return mixed
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function applyPreFilter($k, $v, array $def, array $path, array $list) {
 		// Ignore if there is nothing to do
@@ -269,7 +269,7 @@ class OptionApplier {
 	 * @param array                $path The path of the value for the error message
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function checkTypeValidation(OptionApplierContext $context, $v, array $def, array $path): bool {
 		// Skip, if there is no validation required
@@ -312,7 +312,7 @@ class OptionApplier {
 	 * @param array $list The whole list for the callback
 	 *
 	 * @return mixed
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function applyFilter($k, $v, array $def, array $path, array $list) {
 		// Ignore if there is nothing to do
@@ -338,7 +338,7 @@ class OptionApplier {
 	 * @param array                $list The whole list for the callback
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function checkCustomValidation(OptionApplierContext $context, $k, $v, array &$def, array $path, array $list): bool {
 		// Skip, if there is no validation required
@@ -374,7 +374,7 @@ class OptionApplier {
 	 * @param array                $path The path of the value for the error message
 	 *
 	 * @return bool
-	 * @throws \Labor\Helferlein\Php\Options\InvalidDefinitionException
+	 * @throws \Neunerlei\Helferlein\Php\Options\InvalidDefinitionException
 	 */
 	protected function checkValueValidation(OptionApplierContext $context, $v, array $def, array $path): bool {
 		// Ignore if there is nothing to do

@@ -17,10 +17,10 @@
  * Last modified: 2019.09.12 at 13:38
  */
 
-namespace Labor\Helferlein\Php\Arrays;
+namespace Neunerlei\Helferlein\Php\Arrays;
 
 
-use Labor\Helferlein\Php\Exceptions\HelferleinException;
+use Neunerlei\Helferlein\Php\Exceptions\HelferleinException;
 
 class ArrayDumperException extends HelferleinException {
 	

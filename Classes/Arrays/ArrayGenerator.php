@@ -17,7 +17,7 @@
  * Last modified: 2020.02.05 at 17:18
  */
 
-namespace Labor\Helferlein\Php\Arrays;
+namespace Neunerlei\Helferlein\Php\Arrays;
 
 
 use DOMNode;
@@ -33,7 +33,7 @@ class ArrayGenerator {
 	 * @param bool                                         $asAssocArray
 	 *
 	 * @return array
-	 * @throws \Labor\Helferlein\Php\Arrays\ArrayGeneratorException
+	 * @throws \Neunerlei\Helferlein\Php\Arrays\ArrayGeneratorException
 	 */
 	public static function _fromXml($input, bool $asAssocArray = FALSE): array {
 		if (is_array($input)) return $input;
